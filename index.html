@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ירקות">
+<meta name="theme-color" content="#2E7D32">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>ספירת ירקות ופירות</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family:-apple-system,'Heebo',Arial,sans-serif;
+  background:#F0F4F0; direction:rtl;
+  min-height:100vh; padding-bottom:50px;
+}
+.header {
+  background:linear-gradient(135deg,#2E7D32 0%,#388E3C 100%);
+  color:white; padding:16px 16px 14px;
+  position:sticky; top:0; z-index:100;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+.header-top { display:flex; justify-content:space-between; align-items:center; }
+.app-title { font-size:22px; font-weight:700; }
+.app-title span { font-size:26px; margin-left:6px; }
+.header-date { font-size:12px; opacity:.85; margin-top:2px; }
+.btn-clear {
+  background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.4);
+  color:white; border-radius:20px; padding:6px 14px;
+  font-size:13px; cursor:pointer; font-family:inherit;
+}
+.total-bar {
+  background:white; border-bottom:2px solid #C8E6C9;
+  padding:10px 16px; display:flex; justify-content:space-between; align-items:center;
+}
+.total-bar .label { font-size:14px; color:#555; }
+.total-bar .count {
+  font-size:20px; font-weight:700; color:#2E7D32;
+  background:#E8F5E9; border-radius:20px; padding:2px 14px;
+  min-width:50px; text-align:center;
+}
+.section { margin:12px 12px 0; }
+.section-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; padding-right:4px; }
+.section-header .icon { font-size:18px; }
+.section-header .title {
+  font-size:15px; font-weight:700; color:#1B5E20;
+  text-transform:uppercase; letter-spacing:.04em;
+}
+.col-head {
+  display:grid; grid-template-columns:1fr 100px 82px;
+  gap:6px; padding:0 10px 4px;
+}
+.col-head span { font-size:11px; color:#888; font-weight:600; text-align:center; }
+.col-head span:first-child { text-align:right; }
+.product-row {
+  background:white; border:1px solid #E0E0E0; border-radius:12px;
+  display:grid; grid-template-columns:1fr 100px 82px;
+  gap:6px; align-items:center; padding:10px;
+  margin-bottom:6px; transition:border-color .2s,background .2s;
+}
+.product-row.filled { border-color:#66BB6A; background:#F1F8F1; }
+.product-name {
+  font-size:17px; font-weight:600; color:#1A1A1A;
+  display:flex; align-items:center; gap:6px;
+}
+.product-emoji { font-size:18px; }
+.qty-input {
+  width:100%; border:1px solid #D0D0D0; border-radius:10px;
+  padding:9px 6px; font-size:20px; font-weight:700;
+  text-align:center; background:#FAFAFA; color:#1A1A1A;
+  font-family:inherit; -webkit-appearance:none; appearance:none;
+}
+.qty-input:focus {
+  outline:none; border-color:#2E7D32; background:white;
+  box-shadow:0 0 0 3px rgba(46,125,50,.15);
+}
+.unit-select {
+  width:100%; border:1px solid #D0D0D0; border-radius:10px;
+  padding:9px 4px; font-size:14px; font-weight:600;
+  background:#FAFAFA; color:#1A1A1A; font-family:inherit;
+  cursor:pointer; text-align:center;
+  -webkit-appearance:none; appearance:none;
+}
+.unit-select:focus { outline:none; border-color:#2E7D32; }
+.extras-card, .email-card, .actions-card {
+  background:white; border:1px solid #E0E0E0; border-radius:14px;
+  padding:14px 12px; margin:12px 12px 0;
+}
+.card-title {
+  font-size:15px; font-weight:700; color:#555;
+  margin-bottom:12px; display:flex; align-items:center; gap:6px;
+}
+.extra-row {
+  display:grid; grid-template-columns:1fr 90px 76px;
+  gap:6px; margin-bottom:8px; align-items:center;
+}
+.extra-name-input {
+  border:1px solid #D0D0D0; border-radius:10px;
+  padding:9px 10px; font-size:16px; background:#FAFAFA;
+  color:#1A1A1A; font-family:inherit; width:100%; text-align:right;
+}
+.extra-name-input::placeholder { color:#BBB; font-size:13px; }
+.extra-name-input:focus { outline:none; border-color:#2E7D32; background:white; }
+.email-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.email-label { font-size:14px; color:#555; font-weight:600; min-width:58px; }
+.email-input {
+  flex:1; border:1px solid #D0D0D0; border-radius:10px;
+  padding:9px 10px; font-size:14px; background:#FAFAFA;
+  color:#1A1A1A; font-family:inherit;
+}
+.email-input:focus { outline:none; border-color:#2E7D32; background:white; }
+.email-input.prefilled { border-color:#81C784; background:#F1FBF1; }
+.btn-action {
+  display:block; width:100%; background:#2E7D32; color:white;
+  border:none; border-radius:12px; padding:16px;
+  font-size:17px; font-weight:700; cursor:pointer;
+  font-family:inherit; margin-bottom:10px;
+  box-shadow:0 3px 10px rgba(46,125,50,.25);
+  transition:background .2s, transform .1s;
+}
+.btn-action:active { transform:scale(.97); background:#1B5E20; }
+.btn-action.secondary {
+  background:#1565C0; box-shadow:0 3px 10px rgba(21,101,192,.25);
+}
+.btn-action.secondary:active { background:#0D47A1; }
+.btn-action.tertiary {
+  background:#00796B; box-shadow:0 3px 10px rgba(0,121,107,.25);
+}
+.btn-action.tertiary:active { background:#004D40; }
+.btn-main {
+  display:block; width:calc(100% - 24px); margin:16px 12px 0;
+  background:#2E7D32; color:white; border:none; border-radius:16px;
+  padding:20px; font-size:20px; font-weight:700; cursor:pointer;
+  font-family:inherit; letter-spacing:.02em;
+  box-shadow:0 4px 12px rgba(46,125,50,.3);
+  transition:background .2s, transform .1s;
+}
+.btn-main:active { transform:scale(.97); background:#1B5E20; }
+.install-banner {
+  background:#FFF8E1; border:1px solid #FFD54F; border-radius:12px;
+  margin:12px 12px 0; padding:12px 14px;
+  display:flex; gap:10px; align-items:flex-start;
+}
+.install-banner .ib-icon { font-size:22px; flex-shrink:0; margin-top:2px; }
+.install-banner .ib-text { font-size:13px; color:#5D4037; line-height:1.6; }
+.install-banner .ib-text b { color:#E65100; }
+.ib-close {
+  background:none; border:none; font-size:18px; color:#999;
+  cursor:pointer; padding:0; margin-right:auto; flex-shrink:0;
+}
+.toast {
+  display:none; position:fixed; bottom:30px; left:50%;
+  transform:translateX(-50%); background:#1B5E20; color:white;
+  padding:14px 22px; border-radius:30px; font-size:15px; font-weight:600;
+  z-index:999; max-width:88vw; text-align:center; line-height:1.5;
+  box-shadow:0 4px 20px rgba(0,0,0,.25);
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="app-title"><span>🥦</span>ספירת ירקות ופירות</div>
+      <div class="header-date" id="dateStr"></div>
+    </div>
+    <button class="btn-clear" onclick="clearAll()">🗑 נקה</button>
+  </div>
+</div>
+
+<div class="total-bar">
+  <span class="label">פריטים שנספרו:</span>
+  <span class="count" id="total-count">0</span>
+</div>
+
+<div class="install-banner" id="installBanner">
+  <span class="ib-icon">📲</span>
+  <div class="ib-text">
+    <b>להוסיף לרקע הבית:</b> פתח ב-Safari ← לחץ על <b>שתף ⬆</b> ← <b>"הוסף למסך הבית"</b>
+  </div>
+  <button class="ib-close" onclick="document.getElementById('installBanner').style.display='none'">✕</button>
+</div>
+
+<div class="section">
+  <div class="section-header">
+    <span class="icon">🥕</span><span class="title">ירקות</span>
+  </div>
+  <div class="col-head">
+    <span>מוצר</span><span>כמות</span><span>יחידה</span>
+  </div>
+  <div id="vegetables-list"></div>
+</div>
+
+<div class="section">
+  <div class="section-header">
+    <span class="icon">🍎</span><span class="title">פירות</span>
+  </div>
+  <div class="col-head">
+    <span>מוצר</span><span>כמות</span><span>יחידה</span>
+  </div>
+  <div id="fruits-list"></div>
+</div>
+
+<div class="extras-card">
+  <div class="card-title">📝 מוצרים נוספים</div>
+  <div id="extras-rows"></div>
+</div>
+
+<div class="email-card">
+  <div class="card-title">📧 כתובות דוא"ל</div>
+  <div class="email-row">
+    <span class="email-label">בית:</span>
+    <input type="email" class="email-input prefilled" id="email-home" value="evgenchuk1@gmail.com" dir="ltr">
+  </div>
+  <div class="email-row">
+    <span class="email-label">עבודה:</span>
+    <input type="email" class="email-input" id="email-work" placeholder="יתווסף בהמשך" dir="ltr">
+  </div>
+</div>
+
+<div class="actions-card">
+  <div class="card-title">⚡ פעולות</div>
+  <button class="btn-action" onclick="sendEmail()">📧 שלח דו"ח במייל</button>
+  <button class="btn-action secondary" onclick="shareReport()">📤 שתף דו"ח</button>
+  <button class="btn-action tertiary" onclick="downloadCSV()">📥 הורד קובץ CSV</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const vegetables = [
+  {name:"עגבניות",emoji:"🍅"},{name:"מלפפונים",emoji:"🥒"},{name:"פלפלים",emoji:"🫑"},
+  {name:"בצל",emoji:"🧅"},{name:"גזר",emoji:"🥕"},{name:"תפוחי אדמה",emoji:"🥔"},
+  {name:"כרוב",emoji:"🥬"},{name:"קישואים",emoji:"🥒"},{name:"חצילים",emoji:"🍆"},
+  {name:"שום",emoji:"🧄"},{name:"כרובית",emoji:"🥦"},{name:"ברוקולי",emoji:"🥦"},
+  {name:"תרד",emoji:"🌿"},{name:"חסה",emoji:"🥗"},{name:"עגבניות שרי",emoji:"🍅"},
+  {name:"בטטה",emoji:"🍠"},{name:"פטרייה",emoji:"🍄"},{name:"סלרי",emoji:"🌿"}
+];
+const fruits = [
+  {name:"תפוחים",emoji:"🍎"},{name:"תפוזים",emoji:"🍊"},{name:"בננות",emoji:"🍌"},
+  {name:"ענבים",emoji:"🍇"},{name:"אבטיח",emoji:"🍉"},{name:"מלון",emoji:"🍈"},
+  {name:"אגסים",emoji:"🍐"},{name:"מנגו",emoji:"🥭"},{name:"תותים",emoji:"🍓"},
+  {name:"לימון",emoji:"🍋"},{name:"אפרסק",emoji:"🍑"},{name:"שזיף",emoji:"🍑"},
+  {name:"קלמנטינות",emoji:"🍊"},{name:"קיווי",emoji:"🥝"},{name:"אננס",emoji:"🍍"}
+];
+
+function makeRow(item, id) {
+  const div = document.createElement('div');
+  div.className = 'product-row'; div.id = 'row-' + id;
+  div.innerHTML = `
+    <div class="product-name">
+      <span class="product-emoji">${item.emoji}</span>${item.name}
+    </div>
+    <input type="number" class="qty-input" id="${id}-qty"
+      placeholder="0" min="0" step="0.5" inputmode="decimal"
+      oninput="onQty(this,'${id}')">
+    <select class="unit-select" id="${id}-unit">
+      <option value='ק"ג'>ק"ג</option>
+      <option value="ארגז">ארגז</option>
+      <option value="יח'">יח'</option>
+    </select>`;
+  return div;
+}
+
+function onQty(el, id) {
+  const row = document.getElementById('row-' + id);
+  if (row) row.classList.toggle('filled', parseFloat(el.value) > 0);
+  updateTotal();
+}
+
+function buildRows(items, cid) {
+  const c = document.getElementById(cid);
+  items.forEach((item, i) => c.appendChild(makeRow(item, cid + '-' + i)));
+}
+
+function buildExtras() {
+  const c = document.getElementById('extras-rows');
+  for (let i = 0; i < 5; i++) {
+    const div = document.createElement('div'); div.className = 'extra-row';
+    div.innerHTML = `
+      <input type="text" class="extra-name-input" id="extra-name-${i}"
+        placeholder="שם מוצר ${i+1}">
+      <input type="number" class="qty-input" id="extra-qty-${i}"
+        placeholder="0" min="0" step="0.5" inputmode="decimal" oninput="updateTotal()">
+      <select class="unit-select" id="extra-unit-${i}">
+        <option value='ק"ג'>ק"ג</option>
+        <option value="ארגז">ארגז</option>
+        <option value="יח'">יח'</option>
+      </select>`;
+    c.appendChild(div);
+  }
+}
+
+function updateTotal() {
+  let n = 0;
+  vegetables.forEach((_,i) => { if (parseFloat(document.getElementById('vegetables-list-'+i+'-qty')?.value)||0) n++; });
+  fruits.forEach((_,i) => { if (parseFloat(document.getElementById('fruits-list-'+i+'-qty')?.value)||0) n++; });
+  for (let i=0;i<5;i++) { if (parseFloat(document.getElementById('extra-qty-'+i)?.value)||0) n++; }
+  document.getElementById('total-count').textContent = n;
+}
+
+function clearAll() {
+  if (!confirm('למחוק את כל הנתונים?')) return;
+  document.querySelectorAll('input[type=number]').forEach(el => el.value = '');
+  document.querySelectorAll('.extra-name-input').forEach(el => el.value = '');
+  document.querySelectorAll('.product-row').forEach(el => el.classList.remove('filled'));
+  updateTotal();
+}
+
+function getData() {
+  const rows = [];
+  vegetables.forEach((item, i) => {
+    const qty = parseFloat(document.getElementById('vegetables-list-'+i+'-qty')?.value)||0;
+    if (qty > 0) rows.push({cat:'ירקות', name:item.name, qty, unit:document.getElementById('vegetables-list-'+i+'-unit')?.value});
+  });
+  fruits.forEach((item, i) => {
+    const qty = parseFloat(document.getElementById('fruits-list-'+i+'-qty')?.value)||0;
+    if (qty > 0) rows.push({cat:'פירות', name:item.name, qty, unit:document.getElementById('fruits-list-'+i+'-unit')?.value});
+  });
+  for (let i=0;i<5;i++) {
+    const name=(document.getElementById('extra-name-'+i)?.value||'').trim();
+    const qty=parseFloat(document.getElementById('extra-qty-'+i)?.value)||0;
+    if (name&&qty>0) rows.push({cat:'נוסף', name, qty, unit:document.getElementById('extra-unit-'+i)?.value});
+  }
+  return rows;
+}
+
+function buildReportText(rows, dateStr) {
+  let txt = 'ספירת ירקות ופירות — ' + dateStr + '\n';
+  txt += '='.repeat(40) + '\n';
+  let lastCat = '';
+  rows.forEach(r => {
+    if (r.cat !== lastCat) { txt += '\n' + r.cat + ':\n'; lastCat = r.cat; }
+    txt += '  • ' + r.name + ': ' + r.qty + ' ' + r.unit + '\n';
+  });
+  txt += '\nסה"כ פריטים: ' + rows.length;
+  return txt;
+}
+
+function sendEmail() {
+  const rows = getData();
+  if (!rows.length) { showToast('לא הוזנו נתונים'); return; }
+  const email1 = document.getElementById('email-home').value.trim();
+  const email2 = document.getElementById('email-work').value.trim();
+  const to = [email1, email2].filter(Boolean).join(',');
+  if (!to) { showToast('נא להזין כתובת דוא"ל'); return; }
+  const today = new Date().toLocaleDateString('he-IL');
+  const subject = encodeURIComponent('ספירת ירקות ופירות — ' + today);
+  const body = encodeURIComponent(buildReportText(rows, today));
+  window.location.href = 'mailto:' + to + '?subject=' + subject + '&body=' + body;
+}
+
+function shareReport() {
+  const rows = getData();
+  if (!rows.length) { showToast('לא הוזנו נתונים'); return; }
+  const today = new Date().toLocaleDateString('he-IL');
+  const text = buildReportText(rows, today);
+  if (navigator.share) {
+    navigator.share({ title: 'ספירת ירקות', text })
+      .catch(() => {});
+  } else {
+    navigator.clipboard?.writeText(text)
+      .then(() => showToast('הדו"ח הועתק ללוח'))
+      .catch(() => showToast('שתף: ' + text.substring(0,100) + '...'));
+  }
+}
+
+function downloadCSV() {
+  const rows = getData();
+  if (!rows.length) { showToast('לא הוזנו נתונים'); return; }
+  const today = new Date().toLocaleDateString('he-IL').replace(/\//g,'-');
+  let csv = '\uFEFF' + 'קטגוריה,מוצר,כמות,יחידה\n';
+  rows.forEach(r => csv += `${r.cat},${r.name},${r.qty},${r.unit}\n`);
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'ספירה_' + today + '.csv';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('✅ הקובץ הורד!');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 5000);
+}
+
+// Init
+const now = new Date();
+document.getElementById('dateStr').textContent =
+  now.toLocaleDateString('he-IL', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+buildRows(vegetables, 'vegetables-list');
+buildRows(fruits, 'fruits-list');
+buildExtras();
+
+if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches)
+  document.getElementById('installBanner').style.display = 'none';
+
+// Register service worker
+if ('serviceWorker' in navigator)
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+</script>
+</body>
+</html>
