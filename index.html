@@ -582,21 +582,42 @@ async function sendEmail() {
   const to = [e1, e2].filter(Boolean).join(',');
   if (!to) { showToast('נא להזין כתובת דוא"ל'); return; }
   const today = new Date().toLocaleDateString('he-IL');
+  const filename = 'ספירה_' + today.replace(/\//g, '-') + '.docx';
 
-  // Generate + download Word file automatically
   showToast('מכין קובץ Word...');
   const blob = await generateWordBlob();
-  if (blob) {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'ספירה_' + today.replace(/\//g, '-') + '.docx';
-    a.click();
+  if (!blob) return;
+
+  const file = new File([blob], filename,
+    { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+
+  // iOS / modern browser — Share Sheet with file attached
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    const reportText = buildReport(rows, today);
+    try {
+      await navigator.share({
+        files: [file],
+        title: 'ספירת ירקות ופירות — ' + today,
+        text: reportText
+      });
+      showToast('✅ הקובץ שותף!');
+    } catch(e) {
+      if (e.name !== 'AbortError') showToast('שגיאה: ' + e.message);
+    }
+    return;
   }
 
-  // Open Gmail compose
-  const sub = encodeURIComponent('ספירת ירקות ופירות — ' + today);
-  const body = encodeURIComponent(buildReport(rows, today) + '\n\n📎 קובץ Word הורד אוטומטית — צרף אותו למייל זה');
-  const gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(to) + '&su=' + sub + '&body=' + body;
+  // Desktop fallback — download + open Gmail compose
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+
+  const sub  = encodeURIComponent('ספירת ירקות ופירות — ' + today);
+  const body = encodeURIComponent(buildReport(rows, today) +
+    '\n\n📎 קובץ Word הורד אוטומטית — צרף אותו למייל זה');
+  const gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1&to=' +
+    encodeURIComponent(to) + '&su=' + sub + '&body=' + body;
   setTimeout(() => window.open(gmailUrl, '_blank'), 800);
   showToast('✅ Word הורד + Gmail נפתח — צרף את הקובץ');
 }
@@ -741,9 +762,25 @@ async function downloadWordReport() {
   const blob = await generateWordBlob();
   if (!blob) return;
   const today = new Date().toLocaleDateString('he-IL');
+  const filename = 'ספירה_' + today.replace(/\//g, '-') + '.docx';
+  const file = new File([blob], filename,
+    { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+
+  // iOS Share Sheet
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: filename });
+      showToast('✅ הקובץ שותף!');
+    } catch(e) {
+      if (e.name !== 'AbortError') showToast('שגיאה: ' + e.message);
+    }
+    return;
+  }
+
+  // Desktop: direct download
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'ספירה_' + today.replace(/\//g, '-') + '.docx';
+  a.download = filename;
   a.click();
   showToast('✅ קובץ Word הורד!');
 }
