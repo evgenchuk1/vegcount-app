@@ -626,52 +626,41 @@ if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)
   document.getElementById('installBanner').style.display = 'none';
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 
+
 /* ── Word report ─────────────────────────────────────────────────────── */
-async function loadDocxLib() {
-  if (window.docx) return;
+async function loadHtmlDocx() {
+  if (window.htmlDocx) return;
   return new Promise((resolve, reject) => {
     const s = document.createElement('script');
-    s.src = 'https://unpkg.com/docx@8.5.0/build/index.js';
-    s.onload = resolve; s.onerror = reject;
+    s.src = 'https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.js';
+    s.onload = () => window.htmlDocx ? resolve() : reject('not found');
+    s.onerror = () => reject('load error');
     document.head.appendChild(s);
   });
 }
 
-async function fetchImg(url) {
+async function imgToDataUrl(url) {
   try {
     const r = await fetch(url);
-    return new Uint8Array(await r.arrayBuffer());
-  } catch(e) { return null; }
+    const blob = await r.blob();
+    return await new Promise(res => {
+      const rd = new FileReader();
+      rd.onloadend = () => res(rd.result);
+      rd.readAsDataURL(blob);
+    });
+  } catch(e) { return ''; }
 }
 
 async function downloadWordReport() {
   showToast('מכין דו"ח Word...');
-  try { await loadDocxLib(); } catch(e) { showToast('שגיאה בטעינת ספריה'); return; }
-
-  const { Document, Packer, Table, TableRow, TableCell, Paragraph, TextRun,
-          ImageRun, AlignmentType, WidthType, HeightRule } = window.docx;
+  try { await loadHtmlDocx(); }
+  catch(e) { showToast('שגיאה: ' + e); return; }
 
   const today = new Date().toLocaleDateString('he-IL');
+  const allItems = [...vegetables, ...fruits]
+    .sort((a, b) => a.name.localeCompare(b.name, 'he'));
 
-  // All items sorted Hebrew A-Z
-  const allItems = [...vegetables, ...fruits].sort((a, b) =>
-    a.name.localeCompare(b.name, 'he'));
-
-  // Header row
-  const mkHdr = (txt) => new TableCell({
-    shading: { fill: 'C8E6C9' },
-    children: [new Paragraph({
-      alignment: AlignmentType.CENTER,
-      children: [new TextRun({ text: txt, bold: true, size: 24, font: 'Arial' })]
-    })]
-  });
-  const headerRow = new TableRow({
-    tableHeader: true,
-    children: [mkHdr('ברקוד'), mkHdr('מוצר'), mkHdr('סה"כ ק"ג')]
-  });
-
-  // Data rows
-  const dataRows = [];
+  let rows = '';
   for (const item of allItems) {
     const inputs = document.querySelectorAll(`.box-input[data-id="${item.id}"]`);
     let boxes = 0;
@@ -680,65 +669,41 @@ async function downloadWordReport() {
     const kg = boxes * coeff;
     let kgStr = '';
     if (boxes > 0)
-      kgStr = coeff > 0 ? (kg % 1 === 0 ? kg : kg.toFixed(1)) + ' ק"ג' : boxes + '×?';
+      kgStr = coeff > 0
+        ? (kg % 1 === 0 ? kg : kg.toFixed(1)) + ' ק"ג'
+        : boxes + '×?';
 
-    // Barcode cell
-    let bcCell;
+    let imgHtml = '';
     if (item.barcode) {
-      const imgData = await fetchImg(item.barcode);
-      if (imgData) {
-        bcCell = new TableCell({
-          children: [new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [new ImageRun({ data: imgData, transformation: { width: 180, height: 80 } })]
-          })]
-        });
-      }
+      const b64 = await imgToDataUrl(item.barcode);
+      if (b64) imgHtml = `<img src="${b64}" style="width:190px;height:85px;">`;
     }
-    if (!bcCell) bcCell = new TableCell({ children: [new Paragraph('')] });
 
-    dataRows.push(new TableRow({
-      height: { value: 1200, rule: HeightRule.ATLEAST },
-      children: [
-        bcCell,
-        new TableCell({
-          children: [new Paragraph({
-            alignment: AlignmentType.RIGHT,
-            children: [new TextRun({ text: item.name, font: 'Arial', size: 22 })]
-          })]
-        }),
-        new TableCell({
-          children: [new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [new TextRun({
-              text: kgStr, font: 'Arial', size: 24,
-              bold: !!kgStr, color: kgStr ? '1B5E20' : '000000'
-            })]
-          })]
-        })
-      ]
-    }));
+    const kgColor = kgStr ? '#1B5E20' : '#999999';
+    rows += `
+      <tr>
+        <td style="text-align:center;vertical-align:middle;padding:5px;width:210px;">${imgHtml}</td>
+        <td style="text-align:right;vertical-align:middle;font-family:Arial;font-size:13pt;padding:6px;">${item.name}</td>
+        <td style="text-align:center;vertical-align:middle;font-family:Arial;font-size:14pt;font-weight:bold;color:${kgColor};padding:6px;width:130px;">${kgStr}</td>
+      </tr>`;
   }
 
-  const doc = new Document({
-    sections: [{
-      properties: { page: { margin: { top: 720, right: 720, bottom: 720, left: 720 } } },
-      children: [
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { after: 300 },
-          children: [new TextRun({ text: 'דיווח ספירה שבועית — ' + today, bold: true, size: 36, font: 'Arial' })]
-        }),
-        new Table({
-          width: { size: 100, type: WidthType.PERCENTAGE },
-          columnWidths: [3200, 4800, 2000],
-          rows: [headerRow, ...dataRows]
-        })
-      ]
-    }]
-  });
+  const html = `<!DOCTYPE html>
+<html dir="rtl"><head><meta charset="UTF-8"></head><body>
+<h2 style="text-align:center;font-family:Arial;font-size:18pt;">דיווח ספירה שבועית — ${today}</h2>
+<table border="1" style="width:100%;border-collapse:collapse;font-family:Arial;">
+  <thead>
+    <tr style="background:#C8E6C9;">
+      <th style="padding:7px;font-size:12pt;">ברקוד</th>
+      <th style="padding:7px;font-size:12pt;text-align:right;">מוצר</th>
+      <th style="padding:7px;font-size:12pt;">סה"כ ק"ג</th>
+    </tr>
+  </thead>
+  <tbody>${rows}</tbody>
+</table>
+</body></html>`;
 
-  const blob = await Packer.toBlob(doc);
+  const blob = window.htmlDocx.asBlob(html, { orientation: 'portrait', margins: { top: 500, right: 500, bottom: 500, left: 500 } });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'ספירה_' + today.replace(/\//g, '-') + '.docx';
