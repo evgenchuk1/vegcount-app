@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -44,111 +44,139 @@ body {
   min-width:50px; text-align:center;
 }
 .section { margin:12px 12px 0; }
-.section-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; padding-right:4px; }
-.section-header .icon { font-size:18px; }
+.section-header {
+  display:flex; align-items:center; justify-content:center;
+  gap:10px; margin-bottom:8px; padding:4px 0;
+}
+.section-header .icon { font-size:24px; }
 .section-header .title {
-  font-size:15px; font-weight:700; color:#1B5E20;
-  text-transform:uppercase; letter-spacing:.04em;
+  font-size:22px; font-weight:800; color:#1B5E20;
+  letter-spacing:.03em;
 }
 .col-head {
-  display:grid; grid-template-columns:1fr 58px 56px 64px;
+  display:grid; grid-template-columns:1fr 72px 50px 68px;
   gap:4px; padding:0 10px 4px;
 }
-.col-head span { font-size:10px; color:#888; font-weight:600; text-align:center; }
+.col-head span { font-size:11px; color:#888; font-weight:600; text-align:center; }
 .col-head span:first-child { text-align:right; }
+
+/* ── product row ─────────────────────────────────────── */
 .product-row {
   background:white; border:1px solid #E0E0E0; border-radius:12px;
-  display:grid; grid-template-columns:1fr 58px 56px 64px;
-  gap:4px; align-items:center; padding:8px 10px;
-  margin-bottom:6px; transition:border-color .2s,background .2s;
+  padding:8px 10px; margin-bottom:6px;
+  transition:border-color .2s,background .2s;
 }
 .product-row.filled { border-color:#66BB6A; background:#F1F8F1; }
+
+.product-top {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:6px; gap:4px;
+}
 .product-name {
-  display:flex; align-items:center; gap:4px; min-width:0;
+  font-size:16px; font-weight:600; color:#1A1A1A;
+  display:flex; align-items:center; gap:5px;
+  flex:1; min-width:0;
 }
-.product-emoji { font-size:16px; flex-shrink:0; }
-.product-label {
-  font-size:13px; font-weight:600; color:#1A1A1A;
-  flex:1; min-width:0; line-height:1.25;
+.product-emoji { font-size:17px; flex-shrink:0; }
+.product-label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* barcode */
+.barcode-section { flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.bc-btn {
+  background:none; border:1px solid #ccc; border-radius:5px;
+  padding:3px 6px; cursor:pointer; display:flex; align-items:center;
+  color:#bbb; transition:all .15s; line-height:1;
 }
-.barcode-btn {
-  background:#F5F5F5; border:1px solid #CCC; border-radius:5px;
-  padding:3px 4px; cursor:pointer; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center;
-  transition:background .15s; line-height:0;
+.bc-btn.active { border-color:#66BB6A; color:#2E7D32; background:#E8F5E9; }
+.bc-btn:disabled { cursor:default; opacity:.25; }
+.bc-img {
+  display:none; width:90vw; max-width:360px;
+  border:1px solid #ccc; border-radius:5px; cursor:pointer; margin-top:4px;
 }
-.barcode-btn:active { background:#DDD; }
-.qty-input, .coeff-input {
-  width:100%; border:1px solid #D0D0D0; border-radius:8px;
-  padding:7px 3px; font-size:17px; font-weight:700;
+.bc-img.visible { display:block; }
+.bc-num {
+  display:none; font-family:monospace; font-size:20px; font-weight:900;
+  letter-spacing:3px; color:#1B5E20; padding:12px 8px;
+  border:1px solid #A5D6A7; border-radius:5px; margin-top:4px;
+  background:#F1FBF1; text-align:center; cursor:pointer;
+  width:90vw; max-width:360px;
+}
+.bc-num.visible { display:block; }
+
+/* ── input row ───────────────────────────────────────── */
+.product-bottom {
+  display:grid;
+  grid-template-columns:1fr 50px 68px;
+  gap:5px;
+  align-items:center;
+}
+
+.entries-section { display:flex; flex-direction:column; gap:3px; }
+.entry-row { display:flex; align-items:center; gap:3px; justify-content:flex-end; }
+
+.box-input {
+  width:64px; min-width:64px; flex:none;
+  border:1px solid #D0D0D0; border-radius:8px;
+  padding:7px 4px; font-size:18px; font-weight:700;
   text-align:center; background:#FAFAFA; color:#1A1A1A;
   font-family:inherit; -webkit-appearance:none; appearance:none;
 }
-.qty-input:focus, .coeff-input:focus {
-  outline:none; border-color:#2E7D32; background:white;
-  box-shadow:0 0 0 3px rgba(46,125,50,.15);
-}
-.coeff-input { font-size:14px; color:#444; }
-.total-display {
+.box-input:focus { outline:none; border-color:#2E7D32; background:white; box-shadow:0 0 0 3px rgba(46,125,50,.15); }
+
+.btn-add-loc {
+  flex-shrink:0; width:26px; height:34px;
   background:#E8F5E9; border:1px solid #A5D6A7; border-radius:8px;
-  padding:7px 3px; font-size:14px; font-weight:700;
-  text-align:center; color:#2E7D32;
+  color:#2E7D32; font-size:18px; font-weight:700; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
 }
-.total-display.has-value { background:#C8E6C9; border-color:#43A047; font-size:15px; }
+.btn-add-loc:active { background:#C8E6C9; }
+.btn-remove-loc {
+  flex-shrink:0; width:22px; height:34px;
+  background:#FFEBEE; border:1px solid #FFCDD2; border-radius:8px;
+  color:#C62828; font-size:15px; font-weight:700; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+.btn-remove-loc:active { background:#FFCDD2; }
 
-/* Barcode modal */
-.barcode-modal {
-  display:none; position:fixed; inset:0;
-  background:rgba(0,0,0,.75); z-index:500;
-  justify-content:center; align-items:center;
+.coeff-input {
+  width:50px; border:1px solid #D0D0D0; border-radius:8px;
+  padding:7px 3px; font-size:13px; font-weight:600;
+  text-align:center; background:#FAFAFA; color:#444;
+  font-family:inherit; -webkit-appearance:none; appearance:none;
+  display:block;
 }
-.barcode-modal.open { display:flex; }
-.barcode-card {
-  background:white; border-radius:18px; padding:24px 20px 20px;
-  max-width:320px; width:88%; text-align:center;
-  box-shadow:0 8px 32px rgba(0,0,0,.3);
-}
-.barcode-card .bc-name {
-  font-size:18px; font-weight:700; color:#1B5E20;
-  margin-bottom:18px; direction:rtl;
-}
-.barcode-img-wrap {
-  background:#F5F5F5; border:2px dashed #BBB; border-radius:12px;
-  padding:20px 16px 14px; margin-bottom:16px; cursor:pointer;
-}
-.barcode-hint { font-size:12px; color:#999; margin-top:10px; }
-.barcode-close {
-  background:#2E7D32; color:white; border:none; border-radius:10px;
-  padding:13px 28px; font-size:16px; font-weight:700;
-  cursor:pointer; font-family:inherit; width:100%;
-}
-.barcode-close:active { background:#1B5E20; }
+.coeff-input:focus { outline:none; border-color:#FF8F00; background:white; }
 
+.total-val-box {
+  width:68px;
+  border:2.5px solid #1B5E20;
+  border-radius:8px; padding:6px 3px;
+  font-size:16px; font-weight:800;
+  text-align:center; background:#E8F5E9; color:#1B5E20;
+  min-height:34px; display:flex; align-items:center; justify-content:center;
+}
+
+/* extras / email / actions */
 .extras-card, .email-card, .actions-card {
   background:white; border:1px solid #E0E0E0; border-radius:14px;
   padding:14px 12px; margin:12px 12px 0;
 }
-.card-title {
-  font-size:15px; font-weight:700; color:#555;
-  margin-bottom:10px; display:flex; align-items:center; gap:6px;
-}
-.extras-col-head {
-  display:grid; grid-template-columns:1fr 54px 52px 60px;
-  gap:4px; padding:0 0 6px; margin-bottom:4px;
-}
-.extras-col-head span { font-size:10px; color:#888; font-weight:600; text-align:center; }
-.extras-col-head span:first-child { text-align:right; }
-.extra-row {
-  display:grid; grid-template-columns:1fr 54px 52px 60px;
-  gap:4px; margin-bottom:8px; align-items:center;
-}
+.card-title { font-size:15px; font-weight:700; color:#555; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+.extra-row { display:grid; grid-template-columns:1fr 80px; gap:6px; margin-bottom:8px; align-items:center; }
 .extra-name-input {
   border:1px solid #D0D0D0; border-radius:10px;
-  padding:8px 8px; font-size:14px; background:#FAFAFA;
+  padding:9px 10px; font-size:15px; background:#FAFAFA;
   color:#1A1A1A; font-family:inherit; width:100%; text-align:right;
 }
-.extra-name-input::placeholder { color:#BBB; font-size:12px; }
+.extra-name-input::placeholder { color:#BBB; font-size:13px; }
 .extra-name-input:focus { outline:none; border-color:#2E7D32; background:white; }
+.extra-qty-input {
+  border:1px solid #D0D0D0; border-radius:10px;
+  padding:9px 6px; font-size:17px; font-weight:700;
+  text-align:center; background:#FAFAFA; color:#1A1A1A;
+  font-family:inherit; -webkit-appearance:none; appearance:none; width:100%;
+}
+.extra-qty-input:focus { outline:none; border-color:#2E7D32; background:white; }
 .email-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
 .email-label { font-size:14px; color:#555; font-weight:600; min-width:58px; }
 .email-input {
@@ -216,29 +244,28 @@ body {
 
 <div class="section">
   <div class="section-header">
-    <span class="icon">🥕</span><span class="title">ירקות</span>
+    <span class="icon">🥕</span>
+    <span class="title">ירקות</span>
   </div>
   <div class="col-head">
-    <span>מוצר</span><span>ארגז</span><span>גורם אירוז</span><span>סה"כ ק"ג</span>
+    <span>מוצר</span><span>ארגז</span><span>גורם</span><span>סה"כ ק"ג</span>
   </div>
   <div id="vegetables-list"></div>
 </div>
 
 <div class="section">
   <div class="section-header">
-    <span class="icon">🍎</span><span class="title">פירות</span>
+    <span class="icon">🍎</span>
+    <span class="title">פירות</span>
   </div>
   <div class="col-head">
-    <span>מוצר</span><span>ארגז</span><span>גורם אירוז</span><span>סה"כ ק"ג</span>
+    <span>מוצר</span><span>ארגז</span><span>גורם</span><span>סה"כ ק"ג</span>
   </div>
   <div id="fruits-list"></div>
 </div>
 
 <div class="extras-card">
   <div class="card-title">📝 מוצרים נוספים</div>
-  <div class="extras-col-head">
-    <span>מוצר</span><span>ארגז</span><span>גורם</span><span>סה"כ ק"ג</span>
-  </div>
   <div id="extras-rows"></div>
 </div>
 
@@ -259,264 +286,378 @@ body {
   <button class="btn-action" onclick="sendEmail()">📧 שלח דו"ח במייל</button>
   <button class="btn-action secondary" onclick="shareReport()">📤 שתף דו"ח</button>
   <button class="btn-action tertiary" onclick="downloadCSV()">📥 הורד קובץ CSV</button>
-</div>
-
-<!-- Barcode Modal -->
-<div class="barcode-modal" id="barcodeModal" onclick="closeBarcode()">
-  <div class="barcode-card" onclick="event.stopPropagation()">
-    <div class="bc-name" id="barcodeProductName"></div>
-    <div class="barcode-img-wrap" onclick="closeBarcode()">
-      <div id="barcodeNumber" style="font-size:26px;font-weight:900;letter-spacing:3px;font-family:monospace;color:#1B5E20;padding:14px 4px 8px;word-break:break-all;min-height:52px;"></div>
-      <div class="barcode-hint" id="barcodeHint"></div>
-    </div>
-    <button class="barcode-close" onclick="closeBarcode()">סגור ✕</button>
-  </div>
+  <button class="btn-action" style="background:#6A1B9A;box-shadow:0 3px 10px rgba(106,27,154,.25)" onclick="downloadWordReport()">📄 הורד דו"ח Word</button>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const barcodeSVG = '<svg width="22" height="16" viewBox="0 0 22 16" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="2" height="16" fill="#444"/><rect x="3.5" y="0" width="1" height="16" fill="#444"/><rect x="5.5" y="0" width="2.5" height="16" fill="#444"/><rect x="9.5" y="0" width="1" height="16" fill="#444"/><rect x="11.5" y="0" width="2" height="16" fill="#444"/><rect x="14.5" y="0" width="1" height="16" fill="#444"/><rect x="16.5" y="0" width="3" height="16" fill="#444"/><rect x="20.5" y="0" width="1.5" height="16" fill="#444"/></svg>';
+const BARCODE_SVG = `<svg width="20" height="13" viewBox="0 0 20 13" fill="currentColor">
+  <rect x="0" y="0" width="1.8" height="13"/>
+  <rect x="3.2" y="0" width="0.9" height="13"/>
+  <rect x="5.2" y="0" width="2.2" height="13"/>
+  <rect x="8.8" y="0" width="0.9" height="13"/>
+  <rect x="10.8" y="0" width="1.8" height="13"/>
+  <rect x="13.8" y="0" width="0.9" height="13"/>
+  <rect x="15.8" y="0" width="2.2" height="13"/>
+  <rect x="19.2" y="0" width="0.8" height="13"/>
+</svg>`;
 
+/* ── Data — ירקות sorted א–ת ──────────────────────────── */
 const vegetables = [
-  {name:"עגבניות",             emoji:"🍅", coeff:6,  barcode:""},
-  {name:"מלפפונים",            emoji:"🥒", coeff:6,  barcode:""},
-  {name:"פלפלים",              emoji:"🫑", coeff:5,  barcode:""},
-  {name:"פלפל אדום",           emoji:"🫑", coeff:5,  barcode:""},
-  {name:"פלפל צהוב",           emoji:"🫑", coeff:5,  barcode:""},
-  {name:"פלפל כתום",           emoji:"🫑", coeff:5,  barcode:""},
-  {name:"פלפל ירוק",           emoji:"🫑", coeff:5,  barcode:""},
-  {name:"פלפל ירוק חריף",      emoji:"🌶️", coeff:3,  barcode:""},
-  {name:"בצל",                 emoji:"🧅", coeff:10, barcode:""},
-  {name:"גזר",                 emoji:"🥕", coeff:10, barcode:""},
-  {name:"תפוחי אדמה",          emoji:"🥔", coeff:10, barcode:""},
-  {name:"תפוח אדמה לבן",       emoji:"🥔", coeff:10, barcode:""},
-  {name:"תפוח אדמה לבן גורמה", emoji:"🥔", coeff:7,  barcode:""},
-  {name:"תפוח אדמה אדום",      emoji:"🥔", coeff:10, barcode:""},
-  {name:"תפוח אדמה קטן",       emoji:"🥔", coeff:5,  barcode:""},
-  {name:"כרוב",                emoji:"🥬", coeff:8,  barcode:""},
-  {name:"קישואים",             emoji:"🥒", coeff:6,  barcode:"7290000000824"},
-  {name:"זוקיני ארוז",         emoji:"🥒", coeff:6,  barcode:"7296073417439"},
-  {name:"חצילים",              emoji:"🍆", coeff:6,  barcode:""},
-  {name:"שום",                 emoji:"🧄", coeff:5,  barcode:"6935325410118"},
-  {name:"כרובית",              emoji:"🥦", coeff:8,  barcode:""},
-  {name:"ברוקולי",             emoji:"🥦", coeff:5,  barcode:""},
-  {name:"תרד",                 emoji:"🌿", coeff:4,  barcode:""},
-  {name:"חסה",                 emoji:"🥗", coeff:6,  barcode:""},
-  {name:"עגבניות שרי",         emoji:"🍅", coeff:5,  barcode:""},
-  {name:"שרי עגול",            emoji:"🍅", coeff:5,  barcode:"7290000000916"},
-  {name:"שרי תמר",             emoji:"🍅", coeff:5,  barcode:"7290002766056"},
-  {name:"בטטה",                emoji:"🍠", coeff:10, barcode:""},
-  {name:"פטרייה",              emoji:"🍄", coeff:3,  barcode:""},
-  {name:"סלרי",                emoji:"🌿", coeff:5,  barcode:""},
-  {name:"לפת",                 emoji:"🥔", coeff:5,  barcode:"7290000000190"},
-  {name:"קולרבי",              emoji:"🥦", coeff:5,  barcode:"7290000000220"},
-  {name:"סלק ארוז",            emoji:"🍠", coeff:4,  barcode:"7290020423047"},
+  {id:'v0',  name:'ארטישוק',                      emoji:'🌿', coeff:16,   barcode:'barcodes/artichoke.gif'},
+  {id:'v1',  name:'בטטה',                          emoji:'🍠', coeff:15.6, barcode:'barcodes/sweet-potato.gif'},
+  {id:'v2',  name:'בטטה ארוזה',                    emoji:'🍠', coeff:12,   barcode:'barcodes/sweet-potato-baby.gif'},
+  {id:'v3',  name:'בצל אדום',                      emoji:'🧅', coeff:16.3, barcode:'barcodes/onion-red.gif'},
+  {id:'v4',  name:'בצל יבש',                       emoji:'🧅', coeff:14.4, barcode:'barcodes/onion-dry.gif'},
+  {id:'v44', name:'בצל ירוק',                      emoji:'🌿', coeff:null, barcode:'barcodes/onion-green.gif'},
+  {id:'v45', name:'בצלצלי שאלוט',                  emoji:'🧅', coeff:null, barcode:'barcodes/shallots.gif'},
+  {id:'v5',  name:"ברוקולי ארוז (יח')",            emoji:'🥦', coeff:null, barcode:'barcodes/broccoli-packed.gif'},
+  {id:'v6',  name:'גזר',                            emoji:'🥕', coeff:13,   barcode:'barcodes/carrot-packed.gif'},
+  {id:'v7',  name:'דלורית',                         emoji:'🎃', coeff:14.1, barcode:'barcodes/butternut.gif'},
+  {id:'v8',  name:"דלעת ארוזה (קג')",              emoji:'🎃', coeff:7.8,  barcode:'barcodes/pumpkin-packed.gif'},
+  {id:'v9',  name:'חציל',                           emoji:'🍆', coeff:14,   barcode:'barcodes/eggplant.gif'},
+  {id:'v10', name:'חציל בלאדי',                    emoji:'🍆', coeff:14.3, barcode:'barcodes/eggplant-baladi.gif'},
+  {id:'v11', name:'כרוב אדום',                     emoji:'🥬', coeff:10,   barcode:'barcodes/cabbage-red.gif'},
+  {id:'v12', name:'כרוב לבן',                      emoji:'🥬', coeff:9.4,  barcode:'barcodes/cabbage-white.gif'},
+  {id:'v13', name:'כרובית',                         emoji:'🥦', coeff:9,    barcode:'barcodes/cauliflower.gif'},
+  {id:'v46', name:'כרישה',                          emoji:'🌿', coeff:null, barcode:'barcodes/leek.gif'},
+  {id:'v14', name:'לפת',                            emoji:'🥔', coeff:null, barcode:null, barcodeNum:'7290000000190'},
+  {id:'v15', name:'מלפפון',                         emoji:'🥒', coeff:13.5, barcode:'barcodes/cucumber.gif'},
+  {id:'v16', name:"מלפפון בייבי (יח')",            emoji:'🥒', coeff:null, barcode:'barcodes/cucumber-baby.gif'},
+  {id:'v17', name:'סלק',                            emoji:'🌺', coeff:null, barcode:'barcodes/beet.gif'},
+  {id:'v18', name:"סלק אדום ארוז (יח')",           emoji:'🌺', coeff:null, barcode:null},
+  {id:'v48', name:'סלק מבושל בווקואום',             emoji:'🌺', coeff:null, barcode:'barcodes/beet-cooked.gif'},
+  {id:'v19', name:'עגבניות',                        emoji:'🍅', coeff:null, barcode:'barcodes/tomato.gif'},
+  {id:'v20', name:'פלפל אדום',                     emoji:'🫑', coeff:12,   barcode:'barcodes/pepper-red.gif'},
+  {id:'v21', name:'פלפל ירוק',                     emoji:'🫑', coeff:11.6, barcode:'barcodes/pepper-green.gif'},
+  {id:'v22', name:'פלפל ירוק חריף',                emoji:'🌶️', coeff:9.4,  barcode:'barcodes/pepper-green-hot.gif'},
+  {id:'v23', name:'פלפל כתום',                     emoji:'🫑', coeff:13,   barcode:'barcodes/pepper-orange.gif'},
+  {id:'v49', name:'פלפל מתוק ארוז',               emoji:'🫑', coeff:null, barcode:'barcodes/pepper-sweet-packed.gif'},
+  {id:'v24', name:'פלפל צהוב',                     emoji:'🫑', coeff:13,   barcode:'barcodes/pepper-yellow.gif'},
+  {id:'v25', name:'פלפל שישקה מתוק',               emoji:'🫑', coeff:7,    barcode:'barcodes/pepper-shishka.gif'},
+  {id:'v26', name:'צוקיני',                         emoji:'🥒', coeff:14,   barcode:null, barcodeNum:'7290000000824'},
+  {id:'v27', name:"צוקיני ארוז (קג')",             emoji:'🥒', coeff:13.4, barcode:null, barcodeNum:'7296073417439'},
+  {id:'v47', name:'זוקיני ארוז מובחר',              emoji:'🥒', coeff:null, barcode:'barcodes/zucchini-packed.gif'},
+  {id:'v50', name:'צנונית 400 גרם',                 emoji:'🥬', coeff:null, barcode:'barcodes/radish-400g.gif'},
+  {id:'v28', name:'קולרבי',                         emoji:'🥬', coeff:14,   barcode:null, barcodeNum:'7290000000220'},
+  {id:'v29', name:'קישוא',                          emoji:'🥒', coeff:14,   barcode:'barcodes/kishoa.gif'},
+  {id:'v30', name:'שום',                            emoji:'🧄', coeff:null, barcode:null, barcodeNum:'6935325410118'},
+  {id:'v31', name:'שומר',                           emoji:'🌿', coeff:9.6,  barcode:'barcodes/fennel.gif'},
+  {id:'v51', name:"שורש ג'ינג'ר",                  emoji:'🌿', coeff:null, barcode:'barcodes/ginger.gif'},
+  {id:'v32', name:"שרי כתום (יח')",                emoji:'🍅', coeff:null, barcode:null},
+  {id:'v33', name:"שרי לובלו (יח')",               emoji:'🍅', coeff:null, barcode:'barcodes/tomato-cherry-lulav.gif'},
+  {id:'v34', name:"שרי עגבניות אדומות (יח')",      emoji:'🍅', coeff:null, barcode:'barcodes/tomato-cherry-red.gif'},
+  {id:'v35', name:"שרי עגבניות מיקס (יח')",        emoji:'🍅', coeff:null, barcode:'barcodes/tomato-cherry-mix.gif'},
+  {id:'v36', name:"שרי עגול (יח')",                emoji:'🍅', coeff:null, barcode:null, barcodeNum:'7290000000916'},
+  {id:'v37', name:"שרי צהוב (יח')",                emoji:'🍅', coeff:null, barcode:'barcodes/tomato-cherry-yellow.gif'},
+  {id:'v38', name:"שרי תמר (יח')",                 emoji:'🍅', coeff:null, barcode:null, barcodeNum:'7290002766056'},
+  {id:'v39', name:'תפוח אדמה אגו שף',              emoji:'🥔', coeff:14.4, barcode:'barcodes/potato-ego-chef.gif'},
+  {id:'v40', name:'תפוח אדמה אדום',                emoji:'🥔', coeff:20,   barcode:'barcodes/potato-red.gif'},
+  {id:'v41', name:'תפוח אדמה לבן',                 emoji:'🥔', coeff:20,   barcode:'barcodes/potato-white.gif'},
+  {id:'v42', name:'תפוח אדמה לבן בייבי יפרו',      emoji:'🥔', coeff:13.5, barcode:'barcodes/potato-white-baby.gif'},
+  {id:'v43', name:'תפוח אדמה קטן ארוז',            emoji:'🥔', coeff:16,   barcode:'barcodes/potato-small-packed.gif'},
 ];
 
+/* ── Data — פירות sorted א–ת ──────────────────────────── */
 const fruits = [
-  {name:"תפוחים",              emoji:"🍎", coeff:10, barcode:""},
-  {name:"תפוח עץ פינקריספי",   emoji:"🍎", coeff:10, barcode:""},
-  {name:"תפוח עץ סמיט",        emoji:"🍎", coeff:10, barcode:""},
-  {name:"תפוח עץ גאלה",        emoji:"🍎", coeff:10, barcode:""},
-  {name:"תפוח עץ קנזי",        emoji:"🍎", coeff:10, barcode:""},
-  {name:"תפוח עץ מוזהב",       emoji:"🍎", coeff:10, barcode:""},
-  {name:"תפוח עץ סטרקינג",     emoji:"🍎", coeff:10, barcode:""},
-  {name:"תפוזים",              emoji:"🍊", coeff:10, barcode:""},
-  {name:"בננות",               emoji:"🍌", coeff:13, barcode:""},
-  {name:"ענבים",               emoji:"🍇", coeff:9,  barcode:""},
-  {name:"ענבים אדומים",        emoji:"🍇", coeff:9,  barcode:"7290005678486"},
-  {name:"ענבים לבנים",         emoji:"🍇", coeff:9,  barcode:"7290013128317"},
-  {name:"אבטיח",               emoji:"🍉", coeff:10, barcode:"7290000965031"},
-  {name:"מלון",                emoji:"🍈", coeff:10, barcode:"7290000965055"},
-  {name:"אגסים",               emoji:"🍐", coeff:8,  barcode:""},
-  {name:"אגס אנג'ו",           emoji:"🍐", coeff:8,  barcode:"7290000964911"},
-  {name:"מנגו",                emoji:"🥭", coeff:5,  barcode:""},
-  {name:"תותים",               emoji:"🍓", coeff:3,  barcode:"7290000966779"},
-  {name:"לימון",               emoji:"🍋", coeff:6,  barcode:""},
-  {name:"אפרסק",               emoji:"🍑", coeff:6,  barcode:""},
-  {name:"נקטרינה",             emoji:"🍑", coeff:6,  barcode:"7290000963969"},
-  {name:"שזיף",                emoji:"🍑", coeff:6,  barcode:""},
-  {name:"קלמנטינות",           emoji:"🍊", coeff:10, barcode:""},
-  {name:"קיווי",               emoji:"🥝", coeff:5,  barcode:"7290000966656"},
-  {name:"אננס",                emoji:"🍍", coeff:15, barcode:""},
+  {id:'f0',  name:"אבוקדו בשל ארוז (יח')",         emoji:'🥑', coeff:null, barcode:'barcodes/avocado-ripe.gif'},
+  {id:'f1',  name:'אבוקדו בתפזורת',                emoji:'🥑', coeff:16.7, barcode:'barcodes/avocado.gif'},
+  {id:'f2',  name:"אבוקדו גרנות ארוז (יח')",       emoji:'🥑', coeff:null, barcode:'barcodes/avocado-granot.gif'},
+  {id:'f3',  name:'אבטיח',                           emoji:'🍉', coeff:null, barcode:null, barcodeNum:'7290000965031'},
+  {id:'f4',  name:"אגס אנג\u05F3ו",                emoji:'🍐', coeff:null, barcode:null},
+  {id:'f5',  name:"אוכמניות (יח')",                emoji:'🫐', coeff:null, barcode:null},
+  {id:'f6',  name:"אננס (יח')",                    emoji:'🍍', coeff:null, barcode:'barcodes/pineapple.gif'},
+  {id:'f7',  name:'אפרסמון',                         emoji:'🍊', coeff:20,   barcode:'barcodes/persimmon.gif'},
+  {id:'f8',  name:'אפרסק',                           emoji:'🍑', coeff:null, barcode:null},
+  {id:'f9',  name:'אשכולית אדומה',                  emoji:'🍊', coeff:17,   barcode:'barcodes/grapefruit-red.gif'},
+  {id:'f10', name:'אשכולית לבנה',                   emoji:'🍊', coeff:17,   barcode:'barcodes/grapefruit-white.gif'},
+  {id:'f11', name:'בננות',                           emoji:'🍌', coeff:14.5, barcode:'barcodes/banana.gif'},
+  {id:'f12', name:'גוייאבה',                         emoji:'🍈', coeff:null, barcode:null},
+  {id:'f13', name:'לימון',                           emoji:'🍋', coeff:14,   barcode:'barcodes/lemon.gif'},
+  {id:'f14', name:'לימון ארוז ברשת',                emoji:'🍋', coeff:14.5, barcode:'barcodes/lemon-net.gif'},
+  {id:'f15', name:'מלון',                            emoji:'🍈', coeff:null, barcode:null, barcodeNum:'7290000965055'},
+  {id:'f16', name:'מנגו',                            emoji:'🥭', coeff:null, barcode:null},
+  {id:'f17', name:'נקטרינה',                         emoji:'🍑', coeff:null, barcode:null, barcodeNum:'7290000963969'},
+  {id:'f18', name:'ענבים',                           emoji:'🍇', coeff:null, barcode:null},
+  {id:'f36', name:'ענבים אדומים',                    emoji:'🍇', coeff:null, barcode:null, barcodeNum:'7290005678486'},
+  {id:'f37', name:'ענבים לבנים',                     emoji:'🍇', coeff:null, barcode:null, barcodeNum:'7290013128317'},
+  {id:'f19', name:'פומלה לבנה',                     emoji:'🍊', coeff:9,    barcode:'barcodes/pomelo-white.gif'},
+  {id:'f20', name:'פומלית',                          emoji:'🍊', coeff:15,   barcode:'barcodes/pomelit.gif'},
+  {id:'f21', name:'פסיפלורה',                        emoji:'🌸', coeff:20,   barcode:'barcodes/passionfruit.gif'},
+  {id:'f22', name:"קוקוס לשתיה (יח')",              emoji:'🥥', coeff:null, barcode:'barcodes/coconut-drink.gif'},
+  {id:'f23', name:'קיווי',                           emoji:'🥝', coeff:12,   barcode:null, barcodeNum:'7290000966656'},
+  {id:'f24', name:'קלמנטינה',                        emoji:'🍊', coeff:14,   barcode:'barcodes/clementine.gif'},
+  {id:'f25', name:'שזיף',                            emoji:'🍑', coeff:null, barcode:null},
+  {id:'f26', name:"שסק ארוז (יח')",                 emoji:'🍑', coeff:null, barcode:null},
+  {id:'f27', name:"תותים (יח')",                    emoji:'🍓', coeff:null, barcode:null, barcodeNum:'7290000966779'},
+  {id:'f28', name:'תפוז ברשת למיץ',                 emoji:'🍊', coeff:12,   barcode:'barcodes/orange-net.gif'},
+  {id:'f29', name:'תפוזים',                          emoji:'🍊', coeff:14,   barcode:'barcodes/orange.gif'},
+  {id:'f30', name:'תפוח את גאלה',                   emoji:'🍎', coeff:11,   barcode:'barcodes/apple-gala.gif'},
+  {id:'f31', name:'תפוח עץ מוזהב',                  emoji:'🍎', coeff:12,   barcode:'barcodes/apple-golden.gif'},
+  {id:'f32', name:'תפוח עץ סטרקינג',                emoji:'🍎', coeff:12,   barcode:'barcodes/apple-starking.gif'},
+  {id:'f33', name:'תפוח עץ סמיט',                   emoji:'🍎', coeff:12.5, barcode:'barcodes/apple-smith.gif'},
+  {id:'f34', name:'תפוח עץ פינקריספי',              emoji:'🍎', coeff:18,   barcode:'barcodes/apple-pink-crispy.gif'},
+  {id:'f35', name:'תפוח עץ קנזי',                   emoji:'🍎', coeff:13.2, barcode:null},
 ];
 
-function esc(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
-
-function makeRow(item, id) {
+/* ── Row builder ──────────────────────────────────────── */
+function makeRow(item) {
   const div = document.createElement('div');
-  div.className = 'product-row'; div.id = 'row-' + id;
-  div.innerHTML =
-    '<div class="product-name">' +
-      '<span class="product-emoji">' + item.emoji + '</span>' +
-      '<span class="product-label">' + item.name + '</span>' +
-      '<button class="barcode-btn" onclick="showBarcode(\'' + esc(item.name) + '\',\'' + (item.barcode||'') + '\')" title="ברקוד">' + barcodeSVG + '</button>' +
-    '</div>' +
-    '<input type="number" class="qty-input" id="' + id + '-qty"' +
-      ' placeholder="0" min="0" step="1" inputmode="numeric"' +
-      ' oninput="calcRow(\'' + id + '\')">' +
-    '<input type="number" class="coeff-input" id="' + id + '-coeff"' +
-      ' value="' + item.coeff + '" min="0" step="0.5" inputmode="decimal"' +
-      ' oninput="calcRow(\'' + id + '\')">' +
-    '<div class="total-display" id="' + id + '-total">0</div>';
-  return div;
-}
+  div.className = 'product-row';
+  div.id = 'row-' + item.id;
 
-function calcRow(id) {
-  const boxes = parseFloat(document.getElementById(id+'-qty')?.value) || 0;
-  const coeff = parseFloat(document.getElementById(id+'-coeff')?.value) || 0;
-  const total = boxes * coeff;
-  const el = document.getElementById(id+'-total');
-  if (el) {
-    el.textContent = total > 0 ? (Number.isInteger(total) ? total : total.toFixed(1)) : '0';
-    el.classList.toggle('has-value', total > 0);
+  const hasImg = !!item.barcode;
+  const hasNum = !!item.barcodeNum;
+  let bcPart;
+  if (hasImg) {
+    bcPart = `<button class="bc-btn active" onclick="toggleBarcode('${item.id}')" title="הצג ברקוד">${BARCODE_SVG}</button>
+       <img class="bc-img" id="bc-${item.id}" src="${item.barcode}" onclick="toggleBarcode('${item.id}')" alt="ברקוד">`;
+  } else if (hasNum) {
+    bcPart = `<button class="bc-btn active" onclick="toggleBarcode('${item.id}')" title="הצג ברקוד">${BARCODE_SVG}</button>
+       <div class="bc-num" id="bc-${item.id}" onclick="toggleBarcode('${item.id}')">${item.barcodeNum}</div>`;
+  } else {
+    bcPart = `<button class="bc-btn" disabled title="אין ברקוד">${BARCODE_SVG}</button>`;
   }
-  const row = document.getElementById('row-'+id);
-  if (row) row.classList.toggle('filled', boxes > 0);
-  updateTotal();
+
+  const cv = item.coeff !== null ? item.coeff : '';
+
+  div.innerHTML = `
+    <div class="product-top">
+      <div class="product-name">
+        <span class="product-emoji">${item.emoji}</span>
+        <span class="product-label">${item.name}</span>
+      </div>
+      <div class="barcode-section">${bcPart}</div>
+    </div>
+    <div class="product-bottom">
+      <div class="entries-section" id="entries-${item.id}">
+        <div class="entry-row">
+          <input type="number" class="box-input" data-id="${item.id}"
+            placeholder="0" min="0" step="0.5" inputmode="decimal"
+            oninput="calcRow('${item.id}')">
+          <button class="btn-add-loc" onclick="addEntry('${item.id}')" title="הוסף מיקום">+</button>
+        </div>
+      </div>
+      <input type="number" class="coeff-input" id="coeff-${item.id}"
+        value="${cv}" placeholder="—" step="0.1" inputmode="decimal"
+        oninput="calcRow('${item.id}')">
+      <div class="total-val-box" id="tot-${item.id}">—</div>
+    </div>`;
+  return div;
 }
 
 function buildRows(items, cid) {
   const c = document.getElementById(cid);
-  items.forEach((item, i) => c.appendChild(makeRow(item, cid+'-'+i)));
+  items.forEach(item => c.appendChild(makeRow(item)));
 }
 
+/* ── Multi-location ────────────────────────────────────── */
+function addEntry(id) {
+  const area = document.getElementById('entries-' + id);
+  const row = document.createElement('div');
+  row.className = 'entry-row';
+  row.innerHTML = `
+    <input type="number" class="box-input" data-id="${id}"
+      placeholder="0" min="0" step="0.5" inputmode="decimal"
+      oninput="calcRow('${id}')">
+    <button class="btn-remove-loc" onclick="removeEntry(this,'${id}')" title="הסר">×</button>`;
+  area.appendChild(row);
+}
+
+function removeEntry(btn, id) {
+  btn.closest('.entry-row').remove();
+  calcRow(id);
+}
+
+/* ── Calculation ───────────────────────────────────────── */
+function calcRow(id) {
+  const inputs = document.querySelectorAll(`.box-input[data-id="${id}"]`);
+  let boxes = 0;
+  inputs.forEach(inp => { boxes += parseFloat(inp.value) || 0; });
+
+  const coeff = parseFloat(document.getElementById('coeff-' + id)?.value) || 0;
+  const kg = boxes * coeff;
+
+  const totEl = document.getElementById('tot-' + id);
+  if (totEl) {
+    if (boxes === 0)       totEl.textContent = '—';
+    else if (coeff === 0)  totEl.textContent = boxes + '×?';
+    else                   totEl.textContent = kg % 1 === 0 ? kg : kg.toFixed(1);
+  }
+
+  const rowEl = document.getElementById('row-' + id);
+  if (rowEl) rowEl.classList.toggle('filled', boxes > 0);
+  updateTotal();
+}
+
+function toggleBarcode(id) {
+  document.getElementById('bc-' + id)?.classList.toggle('visible');
+}
+
+/* ── Extras ────────────────────────────────────────────── */
 function buildExtras() {
   const c = document.getElementById('extras-rows');
   for (let i = 0; i < 5; i++) {
-    const div = document.createElement('div'); div.className = 'extra-row';
-    div.innerHTML =
-      '<input type="text" class="extra-name-input" id="extra-name-' + i + '" placeholder="שם מוצר ' + (i+1) + '">' +
-      '<input type="number" class="qty-input" id="extra-qty-' + i + '" placeholder="0" min="0" step="1" inputmode="numeric" oninput="calcExtra(' + i + ')">' +
-      '<input type="number" class="coeff-input" id="extra-coeff-' + i + '" placeholder="0" min="0" step="0.5" inputmode="decimal" oninput="calcExtra(' + i + ')">' +
-      '<div class="total-display" id="extra-total-' + i + '">0</div>';
+    const div = document.createElement('div');
+    div.className = 'extra-row';
+    div.innerHTML = `
+      <input type="text" class="extra-name-input" id="extra-name-${i}" placeholder="שם מוצר ${i+1}">
+      <input type="number" class="extra-qty-input" id="extra-qty-${i}"
+        placeholder='ק"ג' min="0" step="0.5" inputmode="decimal" oninput="updateTotal()">`;
     c.appendChild(div);
   }
 }
 
-function calcExtra(i) {
-  const boxes = parseFloat(document.getElementById('extra-qty-'+i)?.value) || 0;
-  const coeff = parseFloat(document.getElementById('extra-coeff-'+i)?.value) || 0;
-  const total = boxes * coeff;
-  const el = document.getElementById('extra-total-'+i);
-  if (el) {
-    el.textContent = total > 0 ? (Number.isInteger(total) ? total : total.toFixed(1)) : '0';
-    el.classList.toggle('has-value', total > 0);
+function updateTotal() {
+  let n = 0;
+  [...vegetables, ...fruits].forEach(item => {
+    let boxes = 0;
+    document.querySelectorAll(`.box-input[data-id="${item.id}"]`)
+      .forEach(inp => { boxes += parseFloat(inp.value) || 0; });
+    if (boxes > 0) n++;
+  });
+  for (let i = 0; i < 5; i++) {
+    if (parseFloat(document.getElementById('extra-qty-' + i)?.value) || 0) n++;
+  }
+  document.getElementById('total-count').textContent = n;
+}
+
+/* ── Clear ─────────────────────────────────────────────── */
+function clearAll() {
+  if (!confirm('למחוק את כל הנתונים?')) return;
+  [...vegetables, ...fruits].forEach(item => {
+    const area = document.getElementById('entries-' + item.id);
+    if (area) {
+      const rows = area.querySelectorAll('.entry-row');
+      rows.forEach((row, i) => {
+        if (i === 0) { const inp = row.querySelector('.box-input'); if (inp) inp.value = ''; }
+        else row.remove();
+      });
+    }
+    const cEl = document.getElementById('coeff-' + item.id);
+    if (cEl) cEl.value = item.coeff !== null ? item.coeff : '';
+    const tEl = document.getElementById('tot-' + item.id);
+    if (tEl) tEl.textContent = '—';
+    document.getElementById('row-' + item.id)?.classList.remove('filled');
+    document.getElementById('bc-' + item.id)?.classList.remove('visible');
+  });
+  for (let i = 0; i < 5; i++) {
+    const n = document.getElementById('extra-name-' + i);
+    const q = document.getElementById('extra-qty-' + i);
+    if (n) n.value = ''; if (q) q.value = '';
   }
   updateTotal();
 }
 
-function updateTotal() {
-  let n = 0;
-  vegetables.forEach((_,i) => { if (parseFloat(document.getElementById('vegetables-list-'+i+'-qty')?.value)||0) n++; });
-  fruits.forEach((_,i)    => { if (parseFloat(document.getElementById('fruits-list-'+i+'-qty')?.value)||0) n++; });
-  for (let i=0;i<5;i++) { if (parseFloat(document.getElementById('extra-qty-'+i)?.value)||0) n++; }
-  document.getElementById('total-count').textContent = n;
-}
-
-function clearAll() {
-  if (!confirm('למחוק את כל הנתונים?')) return;
-  document.querySelectorAll('.qty-input').forEach(el => el.value = '');
-  document.querySelectorAll('.extra-name-input').forEach(el => el.value = '');
-  document.querySelectorAll('.product-row').forEach(el => el.classList.remove('filled'));
-  document.querySelectorAll('.total-display').forEach(el => { el.textContent = '0'; el.classList.remove('has-value'); });
-  vegetables.forEach((item,i) => {
-    const el = document.getElementById('vegetables-list-'+i+'-coeff');
-    if (el) el.value = item.coeff;
-  });
-  fruits.forEach((item,i) => {
-    const el = document.getElementById('fruits-list-'+i+'-coeff');
-    if (el) el.value = item.coeff;
-  });
-  document.querySelectorAll('.extra-row .coeff-input').forEach(el => el.value = '');
-  updateTotal();
-}
-
+/* ── Data collector ────────────────────────────────────── */
 function getData() {
   const rows = [];
-  vegetables.forEach((item,i) => {
-    const boxes = parseFloat(document.getElementById('vegetables-list-'+i+'-qty')?.value)||0;
-    const coeff = parseFloat(document.getElementById('vegetables-list-'+i+'-coeff')?.value)||0;
-    if (boxes > 0) rows.push({cat:'ירקות', name:item.name, boxes, coeff, total:+(boxes*coeff).toFixed(2)});
-  });
-  fruits.forEach((item,i) => {
-    const boxes = parseFloat(document.getElementById('fruits-list-'+i+'-qty')?.value)||0;
-    const coeff = parseFloat(document.getElementById('fruits-list-'+i+'-coeff')?.value)||0;
-    if (boxes > 0) rows.push({cat:'פירות', name:item.name, boxes, coeff, total:+(boxes*coeff).toFixed(2)});
-  });
-  for (let i=0;i<5;i++) {
-    const name = (document.getElementById('extra-name-'+i)?.value||'').trim();
-    const boxes = parseFloat(document.getElementById('extra-qty-'+i)?.value)||0;
-    const coeff = parseFloat(document.getElementById('extra-coeff-'+i)?.value)||0;
-    if (name && boxes > 0) rows.push({cat:'נוסף', name, boxes, coeff, total:+(boxes*coeff).toFixed(2)});
+  const proc = (item, cat) => {
+    const inputs = document.querySelectorAll(`.box-input[data-id="${item.id}"]`);
+    const parts = [];
+    let boxes = 0;
+    inputs.forEach(inp => { const v = parseFloat(inp.value) || 0; if (v > 0) parts.push(v); boxes += v; });
+    if (boxes > 0) {
+      const coeff = parseFloat(document.getElementById('coeff-' + item.id)?.value) || 0;
+      rows.push({ cat, name: item.name, boxes, parts, coeff, kg: boxes * coeff });
+    }
+  };
+  vegetables.forEach(item => proc(item, 'ירקות'));
+  fruits.forEach(item => proc(item, 'פירות'));
+  for (let i = 0; i < 5; i++) {
+    const name = (document.getElementById('extra-name-' + i)?.value || '').trim();
+    const qty = parseFloat(document.getElementById('extra-qty-' + i)?.value) || 0;
+    if (name && qty > 0) rows.push({ cat: 'נוסף', name, boxes: null, parts: [], coeff: null, kg: qty });
   }
   return rows;
 }
 
-function buildReportText(rows, dateStr) {
-  let txt = 'ספירת ירקות ופירות — ' + dateStr + '\n';
-  txt += '='.repeat(40) + '\n';
+function buildReport(rows, dateStr) {
+  let txt = 'ספירת ירקות ופירות — ' + dateStr + '\n' + '='.repeat(40) + '\n';
   let lastCat = '';
   rows.forEach(r => {
     if (r.cat !== lastCat) { txt += '\n' + r.cat + ':\n'; lastCat = r.cat; }
-    let line = '  \u2022 ' + r.name + ': ' + r.boxes + ' ארגז';
-    if (r.coeff > 0) line += ' \u00d7 ' + r.coeff + ' = ' + r.total + ' ק"ג';
-    txt += line + '\n';
+    if (r.boxes !== null) {
+      const boxStr = r.parts.length > 1 ? r.parts.join('+') + '=' + r.boxes : '' + r.boxes;
+      const kgStr = r.coeff ? ' × ' + r.coeff + ' = ' + (r.kg % 1 === 0 ? r.kg : r.kg.toFixed(1)) + ' ק"ג' : ' ארגז';
+      txt += '  • ' + r.name + ': ' + boxStr + ' ארגז' + kgStr + '\n';
+    } else {
+      txt += '  • ' + r.name + ': ' + r.kg + ' ק"ג\n';
+    }
   });
   txt += '\nסה"כ פריטים: ' + rows.length;
   return txt;
 }
 
-function sendEmail() {
+/* ── Actions ───────────────────────────────────────────── */
+async function sendEmail() {
   const rows = getData();
   if (!rows.length) { showToast('לא הוזנו נתונים'); return; }
-  const email1 = document.getElementById('email-home').value.trim();
-  const email2 = document.getElementById('email-work').value.trim();
-  const to = [email1, email2].filter(Boolean).join(',');
+  const e1 = document.getElementById('email-home').value.trim();
+  const e2 = document.getElementById('email-work').value.trim();
+  const to = [e1, e2].filter(Boolean).join(',');
   if (!to) { showToast('נא להזין כתובת דוא"ל'); return; }
   const today = new Date().toLocaleDateString('he-IL');
-  const subject = encodeURIComponent('ספירת ירקות ופירות — ' + today);
-  const body = encodeURIComponent(buildReportText(rows, today));
-  window.location.href = 'mailto:' + to + '?subject=' + subject + '&body=' + body;
+  const filename = 'ספירה_' + today.replace(/\//g, '-') + '.docx';
+
+  showToast('מכין קובץ Word...');
+  const blob = await generateWordBlob();
+  if (!blob) return;
+
+  const file = new File([blob], filename,
+    { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+
+  // iOS / modern browser — Share Sheet with file attached
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    const reportText = buildReport(rows, today);
+    try {
+      await navigator.share({
+        files: [file],
+        title: 'ספירת ירקות ופירות — ' + today,
+        text: reportText
+      });
+      showToast('✅ הקובץ שותף!');
+    } catch(e) {
+      if (e.name !== 'AbortError') showToast('שגיאה: ' + e.message);
+    }
+    return;
+  }
+
+  // Desktop fallback — download + open Gmail compose
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+
+  const sub  = encodeURIComponent('ספירת ירקות ופירות — ' + today);
+  const body = encodeURIComponent(buildReport(rows, today) +
+    '\n\n📎 קובץ Word הורד אוטומטית — צרף אותו למייל זה');
+  const gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1&to=' +
+    encodeURIComponent(to) + '&su=' + sub + '&body=' + body;
+  setTimeout(() => window.open(gmailUrl, '_blank'), 800);
+  showToast('✅ Word הורד + Gmail נפתח — צרף את הקובץ');
 }
 
 function shareReport() {
   const rows = getData();
   if (!rows.length) { showToast('לא הוזנו נתונים'); return; }
   const today = new Date().toLocaleDateString('he-IL');
-  const text = buildReportText(rows, today);
-  if (navigator.share) {
-    navigator.share({ title: 'ספירת ירקות', text }).catch(() => {});
-  } else {
-    navigator.clipboard?.writeText(text)
-      .then(() => showToast('הדו"ח הועתק ללוח'))
-      .catch(() => showToast('שתף: ' + text.substring(0,100) + '...'));
-  }
+  const text = buildReport(rows, today);
+  if (navigator.share) navigator.share({ title: 'ספירת ירקות', text }).catch(() => {});
+  else navigator.clipboard?.writeText(text).then(() => showToast('הדו"ח הועתק ללוח')).catch(() => {});
 }
 
 function downloadCSV() {
   const rows = getData();
   if (!rows.length) { showToast('לא הוזנו נתונים'); return; }
-  const today = new Date().toLocaleDateString('he-IL').replace(/\//g,'-');
+  const today = new Date().toLocaleDateString('he-IL').replace(/\//g, '-');
   let csv = '\uFEFF' + 'קטגוריה,מוצר,ארגזים,גורם אירוז,סה"כ ק"ג\n';
-  rows.forEach(r => csv += r.cat + ',' + r.name + ',' + r.boxes + ',' + r.coeff + ',' + r.total + '\n');
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
+  rows.forEach(r => { csv += `${r.cat},${r.name},${r.boxes ?? ''},${r.coeff ?? ''},${r.kg}\n`; });
   const a = document.createElement('a');
-  a.href = url; a.download = 'ספירה_' + today + '.csv';
-  a.click(); URL.revokeObjectURL(url);
-  showToast('\u2705 הקובץ הורד!');
-}
-
-function showBarcode(name, barcode) {
-  document.getElementById('barcodeProductName').textContent = name;
-  document.getElementById('barcodeNumber').textContent = barcode || '—';
-  document.getElementById('barcodeHint').textContent = barcode ? 'לחץ לסגירה' : 'ברקוד לא זמין — לחץ לסגירה';
-  document.getElementById('barcodeModal').classList.add('open');
-}
-function closeBarcode() {
-  document.getElementById('barcodeModal').classList.remove('open');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+  a.download = 'ספירה_' + today + '.csv'; a.click();
+  showToast('✅ הקובץ הורד!');
 }
 
 function showToast(msg) {
@@ -525,19 +666,141 @@ function showToast(msg) {
   setTimeout(() => t.style.display = 'none', 5000);
 }
 
-// Init
+/* ── Init ──────────────────────────────────────────────── */
 const now = new Date();
 document.getElementById('dateStr').textContent =
-  now.toLocaleDateString('he-IL', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  now.toLocaleDateString('he-IL', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 buildRows(vegetables, 'vegetables-list');
 buildRows(fruits, 'fruits-list');
 buildExtras();
-
 if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches)
   document.getElementById('installBanner').style.display = 'none';
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 
-if ('serviceWorker' in navigator)
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
+
+/* ── Word report ─────────────────────────────────────────────────────── */
+async function loadHtmlDocx() {
+  if (window.htmlDocx) return;
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.js';
+    s.onload = () => window.htmlDocx ? resolve() : reject('not found');
+    s.onerror = () => reject('load error');
+    document.head.appendChild(s);
+  });
+}
+
+async function imgToDataUrl(url) {
+  try {
+    const r = await fetch(url);
+    const blob = await r.blob();
+    return await new Promise(res => {
+      const rd = new FileReader();
+      rd.onloadend = () => res(rd.result);
+      rd.readAsDataURL(blob);
+    });
+  } catch(e) { return ''; }
+}
+
+async function buildGroupRows(items) {
+  let rows = '';
+  const sorted = [...items].sort((a, b) => a.name.localeCompare(b.name, 'he'));
+  for (const item of sorted) {
+    const inputs = document.querySelectorAll(`.box-input[data-id="${item.id}"]`);
+    let boxes = 0;
+    inputs.forEach(inp => { boxes += parseFloat(inp.value) || 0; });
+    const coeff = parseFloat(document.getElementById('coeff-' + item.id)?.value) || 0;
+    const kg = boxes * coeff;
+    let kgStr = '';
+    if (boxes > 0)
+      kgStr = coeff > 0
+        ? (kg % 1 === 0 ? kg : kg.toFixed(1)) + ' ק"ג'
+        : boxes + '×?';
+
+    let imgHtml = '';
+    if (item.barcode) {
+      const b64 = await imgToDataUrl(item.barcode);
+      if (b64) imgHtml = `<img src="${b64}" style="width:200px;height:88px;">`;
+    }
+
+    const kgColor = kgStr ? '#1B5E20' : '#AAAAAA';
+    rows += `
+      <tr>
+        <td style="text-align:center;vertical-align:middle;padding:6px;width:220px;">${imgHtml}</td>
+        <td style="text-align:center;vertical-align:middle;font-family:Arial;font-size:26pt;padding:8px;">${item.name}</td>
+        <td style="text-align:center;vertical-align:middle;font-family:Arial;font-size:28pt;font-weight:bold;color:${kgColor};padding:8px;width:160px;">${kgStr}</td>
+      </tr>`;
+  }
+  return rows;
+}
+
+async function generateWordBlob() {
+  try { await loadHtmlDocx(); }
+  catch(e) { showToast('שגיאה: ' + e); return null; }
+
+  const today = new Date().toLocaleDateString('he-IL');
+  const vegRows = await buildGroupRows(vegetables);
+  const fruRows = await buildGroupRows(fruits);
+
+  const secHdr = (emoji, title, bg) =>
+    `<tr><td colspan="3" style="background:${bg};text-align:center;font-family:Arial;` +
+    `font-size:24pt;font-weight:bold;padding:12px;">${emoji} ${title}</td></tr>`;
+
+  const html = `<!DOCTYPE html>
+<html dir="rtl"><head><meta charset="UTF-8"></head><body>
+<h2 style="text-align:center;font-family:Arial;font-size:24pt;margin-bottom:16px;">
+  דיווח ספירה שבועית — ${today}
+</h2>
+<table border="1" style="width:100%;border-collapse:collapse;font-family:Arial;">
+  <thead>
+    <tr style="background:#C8E6C9;">
+      <th style="padding:10px;font-size:18pt;text-align:center;">ברקוד</th>
+      <th style="padding:10px;font-size:18pt;text-align:center;">מוצר</th>
+      <th style="padding:10px;font-size:18pt;text-align:center;">סה"כ ק"ג</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${secHdr('\U0001F955', 'ירקות', '#DCEDC8')}
+    ${vegRows}
+    ${secHdr('\U0001F34E', 'פירות', '#FCE4EC')}
+    ${fruRows}
+  </tbody>
+</table>
+</body></html>`;
+
+  return window.htmlDocx.asBlob(html, {
+    orientation: 'portrait',
+    margins: { top: 600, right: 600, bottom: 600, left: 600 }
+  });
+}
+
+async function downloadWordReport() {
+  showToast('מכין דו"ח Word...');
+  const blob = await generateWordBlob();
+  if (!blob) return;
+  const today = new Date().toLocaleDateString('he-IL');
+  const filename = 'ספירה_' + today.replace(/\//g, '-') + '.docx';
+  const file = new File([blob], filename,
+    { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+
+  // iOS Share Sheet
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: filename });
+      showToast('✅ הקובץ שותף!');
+    } catch(e) {
+      if (e.name !== 'AbortError') showToast('שגיאה: ' + e.message);
+    }
+    return;
+  }
+
+  // Desktop: direct download
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  showToast('✅ קובץ Word הורד!');
+}
 </script>
 </body>
 </html>
