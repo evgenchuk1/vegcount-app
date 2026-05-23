@@ -415,7 +415,7 @@ function makeRow(item) {
        <img class="bc-img" id="bc-${item.id}" src="${item.barcode}" onclick="toggleBarcode('${item.id}')" alt="ברקוד">`;
   } else if (hasNum) {
     bcPart = `<button class="bc-btn active" onclick="toggleBarcode('${item.id}')" title="הצג ברקוד">${BARCODE_SVG}</button>
-       <div class="bc-num" id="bc-${item.id}" onclick="toggleBarcode('${item.id}')">${item.barcodeNum}</div>`;
+       <canvas class="bc-img" id="bc-${item.id}" onclick="toggleBarcode('${item.id}')"></canvas>`;
   } else {
     bcPart = `<button class="bc-btn" disabled title="אין ברקוד">${BARCODE_SVG}</button>`;
   }
@@ -673,6 +673,28 @@ document.getElementById('dateStr').textContent =
 buildRows(vegetables, 'vegetables-list');
 buildRows(fruits, 'fruits-list');
 buildExtras();
+
+function renderNumBarcodes() {
+  [...vegetables, ...fruits].forEach(item => {
+    if (item.barcodeNum && !item.barcode) {
+      const canvas = document.getElementById('bc-' + item.id);
+      if (canvas) {
+        try {
+          JsBarcode(canvas, item.barcodeNum, {
+            format: 'EAN13', lineColor: '#000',
+            width: 2, height: 80,
+            displayValue: true, fontSize: 14, margin: 8
+          });
+        } catch(e) {}
+      }
+    }
+  });
+}
+const _jsbScript = document.createElement('script');
+_jsbScript.src = 'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/barcodes/JsBarcode.ean-upc.min.js';
+_jsbScript.onload = renderNumBarcodes;
+document.head.appendChild(_jsbScript);
+
 if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches)
   document.getElementById('installBanner').style.display = 'none';
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
