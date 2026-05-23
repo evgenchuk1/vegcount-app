@@ -351,13 +351,13 @@ function makeRow(item, id) {
     '<div class="product-name">' +
       '<span class="product-emoji">' + item.emoji + '</span>' +
       '<span class="product-label">' + item.name + '</span>' +
-      '<button class="barcode-btn" onclick="showBarcode(\'' + esc(item.name) + '\',\'' + (item.barcode||'') + '\',event)" title="ברקוד">' + barcodeSVG + '</button>' +
+      '<button class="barcode-btn" onclick="showBarcode(\'' + esc(item.name) + '\',\'' + (item.barcode||'') + '\')" title="ברקוד">' + barcodeSVG + '</button>' +
     '</div>' +
     '<input type="number" class="qty-input" id="' + id + '-qty"' +
       ' placeholder="0" min="0" step="1" inputmode="numeric"' +
       ' oninput="calcRow(\'' + id + '\')">' +
     '<input type="number" class="coeff-input" id="' + id + '-coeff"' +
-      ' placeholder="0" min="0" step="0.5" inputmode="decimal"' +
+      ' value="' + item.coeff + '" min="0" step="0.5" inputmode="decimal"' +
       ' oninput="calcRow(\'' + id + '\')">' +
     '<div class="total-display" id="' + id + '-total">0</div>';
   return div;
@@ -417,10 +417,19 @@ function updateTotal() {
 
 function clearAll() {
   if (!confirm('למחוק את כל הנתונים?')) return;
-  document.querySelectorAll('input[type=number]').forEach(el => el.value = '');
+  document.querySelectorAll('.qty-input').forEach(el => el.value = '');
   document.querySelectorAll('.extra-name-input').forEach(el => el.value = '');
   document.querySelectorAll('.product-row').forEach(el => el.classList.remove('filled'));
   document.querySelectorAll('.total-display').forEach(el => { el.textContent = '0'; el.classList.remove('has-value'); });
+  vegetables.forEach((item,i) => {
+    const el = document.getElementById('vegetables-list-'+i+'-coeff');
+    if (el) el.value = item.coeff;
+  });
+  fruits.forEach((item,i) => {
+    const el = document.getElementById('fruits-list-'+i+'-coeff');
+    if (el) el.value = item.coeff;
+  });
+  document.querySelectorAll('.extra-row .coeff-input').forEach(el => el.value = '');
   updateTotal();
 }
 
@@ -500,8 +509,7 @@ function downloadCSV() {
   showToast('\u2705 הקובץ הורד!');
 }
 
-function showBarcode(name, barcode, evt) {
-  if (evt) evt.stopPropagation();
+function showBarcode(name, barcode) {
   document.getElementById('barcodeProductName').textContent = name;
   document.getElementById('barcodeNumber').textContent = barcode || '—';
   document.getElementById('barcodeHint').textContent = barcode ? 'לחץ לסגירה' : 'ברקוד לא זמין — לחץ לסגירה';
