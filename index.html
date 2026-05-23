@@ -73,11 +73,11 @@ body {
   margin-bottom:6px; gap:4px;
 }
 .product-name {
-  font-size:16px; font-weight:600; color:#1A1A1A;
+  font-size:24px; font-weight:600; color:#1A1A1A;
   display:flex; align-items:center; gap:5px;
   flex:1; min-width:0;
 }
-.product-emoji { font-size:17px; flex-shrink:0; }
+.product-emoji { font-size:26px; flex-shrink:0; }
 .product-label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
 /* barcode */
@@ -682,8 +682,8 @@ function renderNumBarcodes() {
         try {
           JsBarcode(canvas, item.barcodeNum, {
             format: 'EAN13', lineColor: '#000',
-            width: 2, height: 80,
-            displayValue: true, fontSize: 14, margin: 8
+            width: 3, height: 100,
+            displayValue: true, fontSize: 22, margin: 10
           });
         } catch(e) {}
       }
