@@ -215,6 +215,42 @@ body {
   z-index:999; max-width:88vw; text-align:center; line-height:1.5;
   box-shadow:0 4px 20px rgba(0,0,0,.25);
 }
+.btn-search {
+  background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.4);
+  color:white; border-radius:20px; padding:6px 14px;
+  font-size:13px; cursor:pointer; font-family:inherit; margin-left:6px;
+}
+.search-bar {
+  display:none; margin-top:10px; position:relative;
+}
+.search-bar.open { display:block; }
+.search-input-field {
+  width:100%; border:none; border-radius:10px;
+  padding:10px 14px; font-size:16px; font-family:inherit;
+  background:white; color:#1A1A1A; outline:none;
+  direction:rtl;
+}
+.search-suggestions {
+  display:none; position:absolute; top:calc(100% + 4px); right:0; left:0;
+  background:white; border-radius:10px;
+  box-shadow:0 4px 20px rgba(0,0,0,.25);
+  max-height:260px; overflow-y:auto;
+  z-index:300;
+}
+.search-sugg-item {
+  padding:12px 14px; font-size:16px; cursor:pointer;
+  display:flex; align-items:center; gap:8px;
+  border-bottom:1px solid #F0F0F0; color:#1A1A1A;
+}
+.search-sugg-item:last-child { border-bottom:none; }
+.search-sugg-item:active, .search-sugg-item:hover { background:#E8F5E9; }
+.search-sugg-cat { font-size:11px; color:#888; margin-right:auto; flex-shrink:0; }
+@keyframes row-flash {
+  0%   { border-color:#2E7D32; background:#B9F6CA; box-shadow:0 0 0 3px rgba(46,125,50,.35); }
+  70%  { border-color:#66BB6A; background:#E8F5E9; box-shadow:0 0 0 1px rgba(46,125,50,.1); }
+  100% { box-shadow:none; }
+}
+.row-highlight { animation:row-flash 1.8s ease-out forwards; }
 </style>
 </head>
 <body>
@@ -225,7 +261,17 @@ body {
       <div class="app-title"><span>🥦</span>ספירת ירקות ופירות</div>
       <div class="header-date" id="dateStr"></div>
     </div>
-    <button class="btn-clear" onclick="clearAll()">🗑 נקה</button>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="btn-search" onclick="toggleSearch()">🔍 חיפוש</button>
+      <button class="btn-clear" onclick="clearAll()">🗑 נקה</button>
+    </div>
+  </div>
+  <div class="search-bar" id="searchBar">
+    <input type="text" class="search-input-field" id="searchInput"
+      placeholder="חפש ירק / פרי..."
+      oninput="onSearchInput(this.value)"
+      onkeydown="if(event.key==='Escape')toggleSearch()">
+    <div class="search-suggestions" id="searchSuggestions"></div>
   </div>
 </div>
 
@@ -665,6 +711,61 @@ function showToast(msg) {
   t.textContent = msg; t.style.display = 'block';
   setTimeout(() => t.style.display = 'none', 5000);
 }
+
+/* ── Search ────────────────────────────────────────────── */
+const allSearchItems = [
+  ...vegetables.map(i => ({...i, cat:'ירקות'})),
+  ...fruits.map(i => ({...i, cat:'פירות'}))
+];
+
+function toggleSearch() {
+  const bar = document.getElementById('searchBar');
+  const isOpen = bar.classList.toggle('open');
+  if (isOpen) {
+    setTimeout(() => document.getElementById('searchInput').focus(), 50);
+  } else {
+    document.getElementById('searchInput').value = '';
+    const sugg = document.getElementById('searchSuggestions');
+    sugg.innerHTML = ''; sugg.style.display = 'none';
+  }
+}
+
+function onSearchInput(val) {
+  const sugg = document.getElementById('searchSuggestions');
+  const q = val.trim();
+  if (!q) { sugg.style.display = 'none'; sugg.innerHTML = ''; return; }
+  const matches = allSearchItems.filter(i => i.name.includes(q));
+  if (!matches.length) { sugg.style.display = 'none'; sugg.innerHTML = ''; return; }
+  sugg.innerHTML = matches.slice(0, 12).map(i =>
+    `<div class="search-sugg-item" onclick="jumpToItem('${i.id}')">
+      <span>${i.emoji}</span>
+      <span>${i.name}</span>
+      <span class="search-sugg-cat">${i.cat}</span>
+    </div>`
+  ).join('');
+  sugg.style.display = 'block';
+}
+
+function jumpToItem(id) {
+  toggleSearch();
+  const row = document.getElementById('row-' + id);
+  if (!row) return;
+  setTimeout(() => {
+    row.scrollIntoView({ behavior:'smooth', block:'center' });
+    row.classList.remove('row-highlight');
+    void row.offsetWidth;
+    row.classList.add('row-highlight');
+    setTimeout(() => row.classList.remove('row-highlight'), 1900);
+  }, 200);
+}
+
+document.addEventListener('click', e => {
+  const bar = document.getElementById('searchBar');
+  if (bar.classList.contains('open') && !bar.closest('.header').contains(e.target)) {
+    const btnSearch = document.querySelector('.btn-search');
+    if (!btnSearch.contains(e.target)) toggleSearch();
+  }
+});
 
 /* ── Init ──────────────────────────────────────────────── */
 const now = new Date();
