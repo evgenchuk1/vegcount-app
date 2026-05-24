@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -372,7 +372,6 @@ const vegetables = [
   {id:'v15', name:'מלפפון',                         emoji:'🥒', coeff:13.5, barcode:'barcodes/cucumber.gif'},
   {id:'v16', name:"מלפפון בייבי (יח')",            emoji:'🥒', coeff:null, barcode:'barcodes/cucumber-baby.gif'},
   {id:'v17', name:'סלק',                            emoji:'🌺', coeff:null, barcode:'barcodes/beet.gif'},
-  {id:'v18', name:"סלק אדום ארוז (יח')",           emoji:'🌺', coeff:null, barcode:null},
   {id:'v48', name:'סלק מבושל בווקואום',             emoji:'🌺', coeff:null, barcode:'barcodes/beet-cooked.gif'},
   {id:'v19', name:'עגבניות',                        emoji:'🍅', coeff:null, barcode:'barcodes/tomato.gif'},
   {id:'v20', name:'פלפל אדום',                     emoji:'🫑', coeff:12,   barcode:'barcodes/pepper-red.gif'},
@@ -411,21 +410,21 @@ const fruits = [
   {id:'f1',  name:'אבוקדו בתפזורת',                emoji:'🥑', coeff:16.7, barcode:'barcodes/avocado.gif'},
   {id:'f2',  name:"אבוקדו גרנות ארוז (יח')",       emoji:'🥑', coeff:null, barcode:'barcodes/avocado-granot.gif'},
   {id:'f3',  name:'אבטיח',                           emoji:'🍉', coeff:null, barcode:null, barcodeNum:'7290000965031'},
-  {id:'f4',  name:"אגס אנג\u05F3ו",                emoji:'🍐', coeff:null, barcode:null},
+  {id:'f4',  name:"אגס אנג׳ו",                emoji:'🍐', coeff:null, barcode:null, barcodeNum:'7290000964911'},
   {id:'f5',  name:"אוכמניות (יח')",                emoji:'🫐', coeff:null, barcode:null},
   {id:'f6',  name:"אננס (יח')",                    emoji:'🍍', coeff:null, barcode:'barcodes/pineapple.gif'},
   {id:'f7',  name:'אפרסמון',                         emoji:'🍊', coeff:20,   barcode:'barcodes/persimmon.gif'},
-  {id:'f8',  name:'אפרסק',                           emoji:'🍑', coeff:null, barcode:null},
+  {id:'f8',  name:'אפרסק',                           emoji:'🍑', coeff:null, barcode:null, barcodeNum:'7290000964027'},
   {id:'f9',  name:'אשכולית אדומה',                  emoji:'🍊', coeff:17,   barcode:'barcodes/grapefruit-red.gif'},
   {id:'f10', name:'אשכולית לבנה',                   emoji:'🍊', coeff:17,   barcode:'barcodes/grapefruit-white.gif'},
   {id:'f11', name:'בננות',                           emoji:'🍌', coeff:14.5, barcode:'barcodes/banana.gif'},
   {id:'f12', name:'גוייאבה',                         emoji:'🍈', coeff:null, barcode:null},
   {id:'f13', name:'לימון',                           emoji:'🍋', coeff:14,   barcode:'barcodes/lemon.gif'},
   {id:'f14', name:'לימון ארוז ברשת',                emoji:'🍋', coeff:14.5, barcode:'barcodes/lemon-net.gif'},
+  {id:'f38', name:'מישמש',                           emoji:'🍑', coeff:null, barcode:null, barcodeNum:'7290000965116'},
   {id:'f15', name:'מלון',                            emoji:'🍈', coeff:null, barcode:null, barcodeNum:'7290000965055'},
   {id:'f16', name:'מנגו',                            emoji:'🥭', coeff:null, barcode:null},
   {id:'f17', name:'נקטרינה',                         emoji:'🍑', coeff:null, barcode:null, barcodeNum:'7290000963969'},
-  {id:'f18', name:'ענבים',                           emoji:'🍇', coeff:null, barcode:null},
   {id:'f36', name:'ענבים אדומים',                    emoji:'🍇', coeff:null, barcode:null, barcodeNum:'7290005678486'},
   {id:'f37', name:'ענבים לבנים',                     emoji:'🍇', coeff:null, barcode:null, barcodeNum:'7290013128317'},
   {id:'f19', name:'פומלה לבנה',                     emoji:'🍊', coeff:9,    barcode:'barcodes/pomelo-white.gif'},
@@ -435,7 +434,7 @@ const fruits = [
   {id:'f23', name:'קיווי',                           emoji:'🥝', coeff:12,   barcode:null, barcodeNum:'7290000966656'},
   {id:'f24', name:'קלמנטינה',                        emoji:'🍊', coeff:14,   barcode:'barcodes/clementine.gif'},
   {id:'f25', name:'שזיף',                            emoji:'🍑', coeff:null, barcode:null},
-  {id:'f26', name:"שסק ארוז (יח')",                 emoji:'🍑', coeff:null, barcode:null},
+  {id:'f26', name:"שסק ארוז (יח')",                 emoji:'🍑', coeff:null, barcode:null, barcodeNum:'7290000966427'},
   {id:'f27', name:"תותים (יח')",                    emoji:'🍓', coeff:null, barcode:null, barcodeNum:'7290000966779'},
   {id:'f28', name:'תפוז ברשת למיץ',                 emoji:'🍊', coeff:12,   barcode:'barcodes/orange-net.gif'},
   {id:'f29', name:'תפוזים',                          emoji:'🍊', coeff:14,   barcode:'barcodes/orange.gif'},
@@ -698,7 +697,7 @@ function downloadCSV() {
   const rows = getData();
   if (!rows.length) { showToast('לא הוזנו נתונים'); return; }
   const today = new Date().toLocaleDateString('he-IL').replace(/\//g, '-');
-  let csv = '\uFEFF' + 'קטגוריה,מוצר,ארגזים,גורם אירוז,סה"כ ק"ג\n';
+  let csv = '﻿' + 'קטגוריה,מוצר,ארגזים,גורם אירוז,סה"כ ק"ג\n';
   rows.forEach(r => { csv += `${r.cat},${r.name},${r.boxes ?? ''},${r.coeff ?? ''},${r.kg}\n`; });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
