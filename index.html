@@ -787,8 +787,9 @@ document.addEventListener('click', e => {
 const now = new Date();
 document.getElementById('dateStr').textContent =
   now.toLocaleDateString('he-IL', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-buildRows(vegetables, 'vegetables-list');
-buildRows(fruits, 'fruits-list');
+const byNameHe = (a, b) => a.name.localeCompare(b.name, 'he');
+buildRows([...vegetables].sort(byNameHe), 'vegetables-list');
+buildRows([...fruits].sort(byNameHe), 'fruits-list');
 buildExtras();
 
 function renderNumBarcodes() {
