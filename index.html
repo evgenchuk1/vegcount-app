@@ -395,26 +395,9 @@ body {
   <div id="extras-rows"></div>
 </div>
 
-<div class="email-card">
-  <div class="card-title">📧 כתובות דוא"ל</div>
-  <div class="email-row">
-    <span class="email-label">בית:</span>
-    <input type="email" class="email-input prefilled" id="email-home" value="evgenchuk1@gmail.com" dir="ltr">
-  </div>
-  <div class="email-row">
-    <span class="email-label">עבודה:</span>
-    <input type="email" class="email-input" id="email-work" placeholder="יתווסף בהמשך" dir="ltr">
-  </div>
-</div>
-
 <div class="actions-card">
-  <div class="card-title">⚡ פעולות</div>
   <button class="btn-action finish" onclick="finishCount()">✅ סיים ספירה ושלח Excel</button>
   <div class="send-status" id="sendStatus"></div>
-  <button class="btn-action" onclick="sendEmail()">📧 שלח דו"ח במייל</button>
-  <button class="btn-action secondary" onclick="shareReport()">📤 שתף דו"ח</button>
-  <button class="btn-action tertiary" onclick="downloadCSV()">📥 הורד קובץ CSV</button>
-  <button class="btn-action" style="background:#6A1B9A;box-shadow:0 3px 10px rgba(106,27,154,.25)" onclick="downloadWordReport()">📄 הורד דו"ח Word</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -759,75 +742,6 @@ function buildReport(rows, dateStr) {
 }
 
 /* ── Actions ───────────────────────────────────────────── */
-async function sendEmail() {
-  const rows = getData();
-  if (!rows.length) { showToast('לא הוזנו נתונים'); return; }
-  const e1 = document.getElementById('email-home').value.trim();
-  const e2 = document.getElementById('email-work').value.trim();
-  const to = [e1, e2].filter(Boolean).join(',');
-  if (!to) { showToast('נא להזין כתובת דוא"ל'); return; }
-  const today = new Date().toLocaleDateString('he-IL');
-  const filename = 'ספירה_' + today.replace(/\//g, '-') + '.docx';
-
-  showToast('מכין קובץ Word...');
-  const blob = await generateWordBlob();
-  if (!blob) return;
-
-  const file = new File([blob], filename,
-    { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-
-  // iOS / modern browser — Share Sheet with file attached
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    const reportText = buildReport(rows, today);
-    try {
-      await navigator.share({
-        files: [file],
-        title: 'ספירת ירקות ופירות — ' + today,
-        text: reportText
-      });
-      showToast('✅ הקובץ שותף!');
-    } catch(e) {
-      if (e.name !== 'AbortError') showToast('שגיאה: ' + e.message);
-    }
-    return;
-  }
-
-  // Desktop fallback — download + open Gmail compose
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-
-  const sub  = encodeURIComponent('ספירת ירקות ופירות — ' + today);
-  const body = encodeURIComponent(buildReport(rows, today) +
-    '\n\n📎 קובץ Word הורד אוטומטית — צרף אותו למייל זה');
-  const gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1&to=' +
-    encodeURIComponent(to) + '&su=' + sub + '&body=' + body;
-  setTimeout(() => window.open(gmailUrl, '_blank'), 800);
-  showToast('✅ Word הורד + Gmail נפתח — צרף את הקובץ');
-}
-
-function shareReport() {
-  const rows = getData();
-  if (!rows.length) { showToast('לא הוזנו נתונים'); return; }
-  const today = new Date().toLocaleDateString('he-IL');
-  const text = buildReport(rows, today);
-  if (navigator.share) navigator.share({ title: 'ספירת ירקות', text }).catch(() => {});
-  else navigator.clipboard?.writeText(text).then(() => showToast('הדו"ח הועתק ללוח')).catch(() => {});
-}
-
-function downloadCSV() {
-  const rows = getData();
-  if (!rows.length) { showToast('לא הוזנו נתונים'); return; }
-  const today = new Date().toLocaleDateString('he-IL').replace(/\//g, '-');
-  let csv = '﻿' + 'קטגוריה,מוצר,ארגזים,גורם אירוז,סה"כ ק"ג\n';
-  rows.forEach(r => { csv += `${r.cat},${r.name},${r.boxes ?? ''},${r.coeff ?? ''},${r.kg}\n`; });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-  a.download = 'ספירה_' + today + '.csv'; a.click();
-  showToast('✅ הקובץ הורד!');
-}
-
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.style.display = 'block';
@@ -1159,129 +1073,6 @@ async function retryPendingReport() {
 window.addEventListener('online', retryPendingReport);
 retryPendingReport();
 
-/* ── Word report ─────────────────────────────────────────────────────── */
-async function loadHtmlDocx() {
-  if (window.htmlDocx) return;
-  return new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.js';
-    s.onload = () => window.htmlDocx ? resolve() : reject('not found');
-    s.onerror = () => reject('load error');
-    document.head.appendChild(s);
-  });
-}
-
-async function imgToDataUrl(url) {
-  try {
-    const r = await fetch(url);
-    const blob = await r.blob();
-    return await new Promise(res => {
-      const rd = new FileReader();
-      rd.onloadend = () => res(rd.result);
-      rd.readAsDataURL(blob);
-    });
-  } catch(e) { return ''; }
-}
-
-async function buildGroupRows(items) {
-  let rows = '';
-  const sorted = [...items].sort((a, b) => a.name.localeCompare(b.name, 'he'));
-  for (const item of sorted) {
-    const inputs = document.querySelectorAll(`.box-input[data-id="${item.id}"]`);
-    let boxes = 0;
-    inputs.forEach(inp => { boxes += parseFloat(inp.value) || 0; });
-    const coeff = parseFloat(document.getElementById('coeff-' + item.id)?.value) || 0;
-    const kg = boxes * coeff;
-    let kgStr = '';
-    if (boxes > 0)
-      kgStr = coeff > 0
-        ? (kg % 1 === 0 ? kg : kg.toFixed(1)) + ' ק"ג'
-        : boxes + '×?';
-
-    let imgHtml = '';
-    if (item.barcode) {
-      const b64 = await imgToDataUrl(item.barcode);
-      if (b64) imgHtml = `<img src="${b64}" style="width:200px;height:88px;">`;
-    }
-
-    const kgColor = kgStr ? '#1B5E20' : '#AAAAAA';
-    rows += `
-      <tr>
-        <td style="text-align:center;vertical-align:middle;padding:6px;width:220px;">${imgHtml}</td>
-        <td style="text-align:center;vertical-align:middle;font-family:Arial;font-size:26pt;padding:8px;">${item.name}</td>
-        <td style="text-align:center;vertical-align:middle;font-family:Arial;font-size:28pt;font-weight:bold;color:${kgColor};padding:8px;width:160px;">${kgStr}</td>
-      </tr>`;
-  }
-  return rows;
-}
-
-async function generateWordBlob() {
-  try { await loadHtmlDocx(); }
-  catch(e) { showToast('שגיאה: ' + e); return null; }
-
-  const today = new Date().toLocaleDateString('he-IL');
-  const vegRows = await buildGroupRows(vegetables);
-  const fruRows = await buildGroupRows(fruits);
-
-  const secHdr = (emoji, title, bg) =>
-    `<tr><td colspan="3" style="background:${bg};text-align:center;font-family:Arial;` +
-    `font-size:24pt;font-weight:bold;padding:12px;">${emoji} ${title}</td></tr>`;
-
-  const html = `<!DOCTYPE html>
-<html dir="rtl"><head><meta charset="UTF-8"></head><body>
-<h2 style="text-align:center;font-family:Arial;font-size:24pt;margin-bottom:16px;">
-  דיווח ספירה שבועית — ${today}
-</h2>
-<table border="1" style="width:100%;border-collapse:collapse;font-family:Arial;">
-  <thead>
-    <tr style="background:#C8E6C9;">
-      <th style="padding:10px;font-size:18pt;text-align:center;">ברקוד</th>
-      <th style="padding:10px;font-size:18pt;text-align:center;">מוצר</th>
-      <th style="padding:10px;font-size:18pt;text-align:center;">סה"כ ק"ג</th>
-    </tr>
-  </thead>
-  <tbody>
-    ${secHdr('\U0001F955', 'ירקות', '#DCEDC8')}
-    ${vegRows}
-    ${secHdr('\U0001F34E', 'פירות', '#FCE4EC')}
-    ${fruRows}
-  </tbody>
-</table>
-</body></html>`;
-
-  return window.htmlDocx.asBlob(html, {
-    orientation: 'portrait',
-    margins: { top: 600, right: 600, bottom: 600, left: 600 }
-  });
-}
-
-async function downloadWordReport() {
-  showToast('מכין דו"ח Word...');
-  const blob = await generateWordBlob();
-  if (!blob) return;
-  const today = new Date().toLocaleDateString('he-IL');
-  const filename = 'ספירה_' + today.replace(/\//g, '-') + '.docx';
-  const file = new File([blob], filename,
-    { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-
-  // iOS Share Sheet
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    try {
-      await navigator.share({ files: [file], title: filename });
-      showToast('✅ הקובץ שותף!');
-    } catch(e) {
-      if (e.name !== 'AbortError') showToast('שגיאה: ' + e.message);
-    }
-    return;
-  }
-
-  // Desktop: direct download
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-  showToast('✅ קובץ Word הורד!');
-}
 </script>
 </body>
 </html>
