@@ -1,5 +1,5 @@
-const CACHE = 'vegcount-v10';
-const ASSETS = ['./', './index.html', './manifest.json',
+const CACHE = 'vegcount-v11';
+const ASSETS = ['./', './index.html', './manifest.json', './xlsx-report.js',
   './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e =>

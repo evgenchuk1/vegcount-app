@@ -24,8 +24,10 @@ body {
   position:sticky; top:0; z-index:100;
   box-shadow:0 2px 8px rgba(0,0,0,.15);
 }
-.header-top { display:flex; justify-content:space-between; align-items:center; }
-.app-title { font-size:22px; font-weight:700; }
+.header-top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.header-top > div:first-child { min-width:0; }
+.app-title { font-size:22px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+@media (max-width:430px) { .app-title { font-size:17px; } .app-title span { font-size:20px; } .btn-search,.btn-clear { padding:6px 10px; white-space:nowrap; } }
 .app-title span { font-size:26px; margin-left:6px; }
 .header-date { font-size:12px; opacity:.85; margin-top:2px; }
 .btn-clear {
@@ -251,6 +253,83 @@ body {
   100% { box-shadow:none; }
 }
 .row-highlight { animation:row-flash 1.8s ease-out forwards; }
+
+/* ── Alphabet wheel (3D drum) ──────────────────────────── */
+.btn-abc {
+  background:rgba(255,255,255,.95); border:none; color:#1B5E20;
+  border-radius:12px; width:46px; height:40px; cursor:pointer;
+  font-family:inherit; font-size:17px; font-weight:900; letter-spacing:-1px;
+  box-shadow:0 3px 0 #A5D6A7, 0 5px 10px rgba(0,0,0,.25);
+}
+.btn-abc:active { transform:translateY(2px); box-shadow:0 1px 0 #A5D6A7; }
+.abc-overlay {
+  display:none; position:fixed; inset:0; z-index:500;
+  background:radial-gradient(circle at 50% 45%, rgba(27,94,32,.55), rgba(0,0,0,.82));
+  -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
+  flex-direction:column; align-items:center; justify-content:center;
+  touch-action:none; user-select:none; -webkit-user-select:none;
+}
+.abc-overlay.open { display:flex; }
+.abc-cat {
+  display:flex; background:rgba(255,255,255,.15); border-radius:30px; padding:4px; margin-bottom:14px;
+}
+.abc-cat button {
+  border:none; background:none; color:white; font-family:inherit;
+  font-size:18px; font-weight:700; padding:10px 22px; border-radius:26px; cursor:pointer;
+}
+.abc-cat button.on { background:white; color:#1B5E20; box-shadow:0 2px 8px rgba(0,0,0,.3); }
+.abc-stage {
+  position:relative; width:min(78vw,300px); height:min(62vh,470px);
+  perspective:900px; perspective-origin:50% 50%;
+}
+.abc-stage::before, .abc-stage::after {   /* drum end caps / rails */
+  content:''; position:absolute; top:4%; bottom:4%; width:16px; border-radius:8px; z-index:2;
+  background:linear-gradient(90deg,#5d4037,#d7ccc8 45%,#8d6e63 55%,#3e2723);
+  box-shadow:0 0 12px rgba(0,0,0,.6);
+}
+.abc-stage::before { right:-10px; } .abc-stage::after { left:-10px; }
+.abc-drum {
+  position:absolute; inset:0; transform-style:preserve-3d;
+}
+.abc-face {
+  position:absolute; left:6px; right:6px; top:50%; height:76px; margin-top:-38px;
+  display:flex; align-items:center; justify-content:center; gap:14px;
+  backface-visibility:hidden; -webkit-backface-visibility:hidden;
+  background:linear-gradient(180deg,#fafafa 0%,#e8f5e9 45%,#c8e6c9 100%);
+  border-top:1px solid rgba(255,255,255,.9); border-bottom:1px solid rgba(0,0,0,.25);
+  color:#1B5E20; font-size:54px; font-weight:900; cursor:pointer;
+  text-shadow:0 2px 0 #fff, 0 3px 3px rgba(0,0,0,.3);
+}
+.abc-face .cnt {
+  font-size:15px; font-weight:700; color:#2E7D32; background:white;
+  border-radius:12px; padding:2px 8px; text-shadow:none; box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.abc-face.empty { color:#a5b6a6; }
+.abc-face.empty .cnt { display:none; }
+.abc-shade {      /* cylinder lighting */
+  position:absolute; inset:0; pointer-events:none; z-index:1; border-radius:10px;
+  background:linear-gradient(180deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,0) 32%,rgba(0,0,0,0) 68%,rgba(0,0,0,.85) 100%);
+}
+.abc-window {     /* selection lens */
+  position:absolute; left:-14px; right:-14px; top:50%; height:86px; margin-top:-43px;
+  border:3px solid #FFD54F; border-radius:16px; pointer-events:none; z-index:3;
+  box-shadow:0 0 0 2px rgba(0,0,0,.25), 0 0 22px rgba(255,213,79,.6), inset 0 0 14px rgba(255,213,79,.35);
+}
+.abc-hint { color:rgba(255,255,255,.85); font-size:14px; margin-top:16px; text-align:center; }
+.abc-close {
+  position:absolute; top:max(18px, env(safe-area-inset-top)); left:18px;
+  width:46px; height:46px; border-radius:50%; border:none; cursor:pointer;
+  background:rgba(255,255,255,.2); color:white; font-size:24px;
+}
+
+/* ── Finish & send ─────────────────────────────────────── */
+.btn-action.finish {
+  background:linear-gradient(135deg,#E65100,#F57C00); font-size:19px; padding:18px;
+  box-shadow:0 4px 14px rgba(230,81,0,.35);
+}
+.btn-action.finish:active { background:#BF360C; }
+.send-status { font-size:13px; color:#555; text-align:center; margin:-4px 0 12px; line-height:1.5; }
+.send-status.warn { color:#C62828; font-weight:600; }
 </style>
 </head>
 <body>
@@ -262,6 +341,7 @@ body {
       <div class="header-date" id="dateStr"></div>
     </div>
     <div style="display:flex;gap:6px;align-items:center;">
+      <button class="btn-abc" onclick="openAbc()" title="קפיצה לפי אות">אב</button>
       <button class="btn-search" onclick="toggleSearch()">🔍 חיפוש</button>
       <button class="btn-clear" onclick="clearAll()">🗑 נקה</button>
     </div>
@@ -329,6 +409,8 @@ body {
 
 <div class="actions-card">
   <div class="card-title">⚡ פעולות</div>
+  <button class="btn-action finish" onclick="finishCount()">✅ סיים ספירה ושלח Excel</button>
+  <div class="send-status" id="sendStatus"></div>
   <button class="btn-action" onclick="sendEmail()">📧 שלח דו"ח במייל</button>
   <button class="btn-action secondary" onclick="shareReport()">📤 שתף דו"ח</button>
   <button class="btn-action tertiary" onclick="downloadCSV()">📥 הורד קובץ CSV</button>
@@ -337,6 +419,21 @@ body {
 
 <div class="toast" id="toast"></div>
 
+<div class="abc-overlay" id="abcOverlay">
+  <button class="abc-close" onclick="closeAbc()">✕</button>
+  <div class="abc-cat">
+    <button id="abcCatV" class="on" onclick="setAbcCat('v')">🥕 ירקות</button>
+    <button id="abcCatF" onclick="setAbcCat('f')">🍎 פירות</button>
+  </div>
+  <div class="abc-stage" id="abcStage">
+    <div class="abc-drum" id="abcDrum"></div>
+    <div class="abc-shade"></div>
+    <div class="abc-window"></div>
+  </div>
+  <div class="abc-hint">גלגל למעלה / למטה ולחץ על אות</div>
+</div>
+
+<script src="xlsx-report.js"></script>
 <script>
 const BARCODE_SVG = `<svg width="20" height="13" viewBox="0 0 20 13" fill="currentColor">
   <rect x="0" y="0" width="1.8" height="13"/>
@@ -372,6 +469,7 @@ const vegetables = [
   {id:'v15', name:'מלפפון',                         emoji:'🥒', coeff:13.5, barcode:'barcodes/cucumber.gif'},
   {id:'v16', name:"מלפפון בייבי (יח')",            emoji:'🥒', coeff:null, barcode:'barcodes/cucumber-baby.gif'},
   {id:'v17', name:'סלק',                            emoji:'🌺', coeff:null, barcode:'barcodes/beet.gif'},
+  {id:'v18', name:"סלק אדום ארוז (יח')",           emoji:'🌺', coeff:null, barcode:null},
   {id:'v48', name:'סלק מבושל בווקואום',             emoji:'🌺', coeff:null, barcode:'barcodes/beet-cooked.gif'},
   {id:'v19', name:'עגבניות',                        emoji:'🍅', coeff:null, barcode:'barcodes/tomato.gif'},
   {id:'v20', name:'פלפל אדום',                     emoji:'🫑', coeff:12,   barcode:'barcodes/pepper-red.gif'},
@@ -406,6 +504,7 @@ const vegetables = [
   {id:'v54', name:'פלפל ירוק בהיר',                emoji:'🫑', coeff:null, barcode:null},
   {id:'v55', name:'תירס מתוק לבן',                 emoji:'🌽', coeff:null, barcode:null},
   {id:'v56', name:'תירס צמח',                       emoji:'🌽', coeff:null, barcode:null},
+  {id:'v57', name:'תירס בחוף',                       emoji:'🌽', coeff:null, barcode:null},
 ];
 
 /* ── Data — פירות sorted א–ת ──────────────────────────── */
@@ -463,6 +562,11 @@ const fruits = [
   {id:'f51', name:'תפוח עץ סנדוונר',                 emoji:'🍎', coeff:null, barcode:null},
   {id:'f52', name:'מלון שרנתייה',                    emoji:'🍈', coeff:null, barcode:null, barcodeNum:'7290000965611'},
   {id:'f53', name:"ענבים בטעם צמר גפן מתוק",         emoji:'🍇', coeff:null, barcode:null, barcodeNum:'7290017593579'},
+  {id:'f54', name:'חבוש',                            emoji:'🍐', coeff:null, barcode:null},
+  {id:'f55', name:'פיטאיה',                          emoji:'🐉', coeff:null, barcode:null},
+  {id:'f56', name:'שזיף שגיב',                       emoji:'🍑', coeff:null, barcode:null},
+  {id:'f57', name:'תמר בהרי אריזה',                  emoji:'🌴', coeff:null, barcode:null},
+  {id:'f58', name:'תמר בהרי בתפזורת',                emoji:'🌴', coeff:null, barcode:null},
 ];
 
 /* ── Row builder ──────────────────────────────────────── */
@@ -819,6 +923,241 @@ if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)
   document.getElementById('installBanner').style.display = 'none';
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 
+
+/* ── Alphabet wheel (3D drum) ──────────────────────────────────────── */
+const ABC = 'אבגדהוזחטיכלמנסעפצקרשת'.split('');
+const ABC_STEP = 360 / ABC.length;
+const ABC_FACE_H = 76;
+const ABC_R = (ABC_FACE_H / 2) / Math.tan(Math.PI / ABC.length);
+let abcCat = 'v', abcRot = 0, abcAnim = null;
+
+function abcItems(cat) {
+  return (cat === 'v' ? vegetables : fruits).slice().sort(byNameHe);
+}
+
+function buildAbc() {
+  const drum = document.getElementById('abcDrum');
+  const items = abcItems(abcCat);
+  drum.innerHTML = ABC.map((l, i) => {
+    const n = items.filter(it => it.name.startsWith(l)).length;
+    return `<div class="abc-face${n ? '' : ' empty'}" data-i="${i}"
+      style="transform:rotateX(${-i * ABC_STEP}deg) translateZ(${ABC_R}px)">
+      <span>${l}</span><span class="cnt">${n}</span></div>`;
+  }).join('');
+  renderAbc();
+}
+
+function renderAbc() {
+  document.getElementById('abcDrum').style.transform =
+    `translateZ(${-ABC_R}px) rotateX(${abcRot}deg)`;
+  document.querySelectorAll('.abc-face').forEach((f, i) => {
+    let d = ((abcRot - i * ABC_STEP) % 360 + 540) % 360 - 180;   // −180..180
+    f.style.filter = `brightness(${Math.max(.35, Math.cos(d * Math.PI / 180)).toFixed(2)})`;
+  });
+}
+
+function abcIndex() { return ((Math.round(abcRot / ABC_STEP) % ABC.length) + ABC.length) % ABC.length; }
+
+function animateAbcTo(target, ms, done) {
+  cancelAnimationFrame(abcAnim);
+  const from = abcRot, t0 = performance.now();
+  const tick = t => {
+    const k = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - k, 3);
+    abcRot = from + (target - from) * e; renderAbc();
+    if (k < 1) abcAnim = requestAnimationFrame(tick); else done && done();
+  };
+  abcAnim = requestAnimationFrame(tick);
+}
+
+function snapAbc() { animateAbcTo(Math.round(abcRot / ABC_STEP) * ABC_STEP, 220); }
+
+function setAbcCat(c) {
+  abcCat = c;
+  document.getElementById('abcCatV').classList.toggle('on', c === 'v');
+  document.getElementById('abcCatF').classList.toggle('on', c === 'f');
+  buildAbc();
+}
+
+function openAbc() {
+  if (document.getElementById('searchBar').classList.contains('open')) toggleSearch();
+  document.getElementById('abcOverlay').classList.add('open');
+  buildAbc();
+}
+function closeAbc() { document.getElementById('abcOverlay').classList.remove('open'); }
+
+function jumpToLetter(i) {
+  const letter = ABC[i];
+  const hits = abcItems(abcCat).filter(it => it.name.startsWith(letter));
+  if (!hits.length) { showToast('אין מוצרים באות ' + letter); return; }
+  closeAbc();
+  const first = document.getElementById('row-' + hits[0].id);
+  const headerH = document.querySelector('.header').offsetHeight;
+  window.scrollTo({ top: first.getBoundingClientRect().top + window.scrollY - headerH - 10, behavior: 'smooth' });
+  hits.forEach(it => {
+    const row = document.getElementById('row-' + it.id);
+    row.classList.remove('row-highlight'); void row.offsetWidth; row.classList.add('row-highlight');
+    setTimeout(() => row.classList.remove('row-highlight'), 1900);
+  });
+}
+
+(function initAbcGestures() {
+  const stage = document.getElementById('abcStage');
+  const DEG_PER_PX = 180 / Math.PI / ABC_R;
+  let startY = 0, lastY = 0, lastT = 0, vel = 0, moved = 0, down = false;
+
+  stage.addEventListener('pointerdown', e => {
+    cancelAnimationFrame(abcAnim);
+    down = true; moved = 0; vel = 0;
+    startY = lastY = e.clientY; lastT = performance.now();
+    stage.setPointerCapture(e.pointerId);
+  });
+  stage.addEventListener('pointermove', e => {
+    if (!down) return;
+    const now = performance.now(), dy = e.clientY - lastY;
+    abcRot -= dy * DEG_PER_PX;
+    vel = -dy * DEG_PER_PX / Math.max(1, now - lastT);
+    moved = Math.max(moved, Math.abs(e.clientY - startY));
+    lastY = e.clientY; lastT = now; renderAbc();
+  });
+  stage.addEventListener('pointerup', e => {
+    if (!down) return; down = false;
+    if (moved < 8) {                               // tap → choose letter
+      const el = document.elementsFromPoint(e.clientX, e.clientY).find(x => x.classList?.contains('abc-face'));
+      const i = el ? +el.dataset.i : abcIndex();
+      let target = abcRot + ((((i * ABC_STEP - abcRot) % 360) + 540) % 360 - 180);
+      animateAbcTo(target, 200, () => jumpToLetter(i));
+      return;
+    }
+    if (performance.now() - lastT > 80) vel = 0;  // finger stopped before release
+    const coast = () => {                          // inertia, then snap
+      vel *= 0.95; abcRot += vel * 16; renderAbc();
+      if (Math.abs(vel) > 0.01) abcAnim = requestAnimationFrame(coast); else snapAbc();
+    };
+    abcAnim = requestAnimationFrame(coast);
+  });
+  stage.addEventListener('pointercancel', () => { down = false; snapAbc(); });
+
+  let wheelT;
+  stage.addEventListener('wheel', e => {
+    e.preventDefault(); cancelAnimationFrame(abcAnim);
+    abcRot += e.deltaY * 0.12; renderAbc();
+    clearTimeout(wheelT); wheelT = setTimeout(snapAbc, 120);
+  }, { passive: false });
+})();
+
+/* ── Finish count → Excel → auto e-mail ────────────────────────────── */
+// Google Apps Script web-app (sends from Gmail to the fixed recipient list kept in the script)
+const REPORT_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxQcz1hL-kStHmSysz4gyEVA1ZomvXGaLWbMAbGOBpfJxwnucBV_84RCfg3MLC0gtji/exec';
+const REPORT_KEY = 'veg118';
+const BRANCH = '118';
+const QUEUE_KEY = 'vegcount-pending-report';
+
+async function loadExcelJS() {
+  if (window.ExcelJS) return;
+  await new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';
+    s.onload = res; s.onerror = () => rej('לא ניתן לטעון ExcelJS');
+    document.head.appendChild(s);
+  });
+}
+
+function collectSections() {
+  const rowsOf = items => items.slice().sort(byNameHe).map(item => {
+    const parts = [];
+    document.querySelectorAll(`.box-input[data-id="${item.id}"]`)
+      .forEach(inp => { const v = parseFloat(inp.value) || 0; if (v > 0) parts.push(v); });
+    const boxes = parts.reduce((a, b) => a + b, 0);
+    const coeff = parseFloat(document.getElementById('coeff-' + item.id)?.value) || 0;
+    return { name: item.name, parts, boxes, coeff, kg: boxes * coeff };
+  });
+  const extras = [];
+  for (let i = 0; i < 5; i++) {
+    const name = (document.getElementById('extra-name-' + i)?.value || '').trim();
+    const kg = parseFloat(document.getElementById('extra-qty-' + i)?.value) || 0;
+    if (name && kg > 0) extras.push({ name, parts: [], boxes: 0, coeff: 0, kg, extra: true });
+  }
+  return [
+    { title: 'ירקות', icon: '🥕', color: 'FFDCEDC8', rows: rowsOf(vegetables) },
+    { title: 'פירות', icon: '🍎', color: 'FFFCE4EC', rows: rowsOf(fruits) },
+    { title: 'מוצרים נוספים', icon: '📝', color: 'FFFFF3E0', rows: extras },
+  ];
+}
+
+function bufToB64(buf) {
+  const bytes = new Uint8Array(buf); let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+
+function setSendStatus(msg, warn) {
+  const el = document.getElementById('sendStatus');
+  el.textContent = msg; el.classList.toggle('warn', !!warn);
+}
+
+async function postReport(payload) {
+  const r = await fetch(REPORT_ENDPOINT, { method: 'POST', body: JSON.stringify(payload) });
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.error || 'שגיאת שרת');
+}
+
+async function finishCount() {
+  const rows = getData();
+  if (!rows.length) { showToast('לא הוזנו נתונים'); return; }
+  if (!confirm('לסיים את הספירה ולשלוח קובץ Excel לכל הנמענים?')) return;
+
+  showToast('מכין קובץ Excel...');
+  try { await loadExcelJS(); } catch (e) { showToast('שגיאה: ' + e); return; }
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const date = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()}`;
+  const time = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const wb = buildCountWorkbook(ExcelJS, collectSections(), { date, time, branch: BRANCH });
+  const buf = await wb.xlsx.writeBuffer();
+  const filename = `ספירת_ירקות_ופירות_${date}.xlsx`;
+
+  if (!REPORT_ENDPOINT) {                 // auto-send not configured yet → share / download
+    const file = new File([buf], filename, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file], title: filename }).catch(() => {});
+    } else {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = filename; a.click();
+    }
+    setSendStatus('שליחה אוטומטית עדיין לא הוגדרה — הקובץ נשמר/שותף', true);
+    return;
+  }
+
+  const payload = {
+    key: REPORT_KEY, filename, b64: bufToB64(buf),
+    subject: `ספירת ירקות ופירות — סניף ${BRANCH} — ${date}`,
+    body: buildReport(rows, date),
+  };
+  showToast('שולח...');
+  try {
+    await postReport(payload);
+    try { localStorage.removeItem(QUEUE_KEY); } catch (e) {}
+    setSendStatus(`✅ נשלח בהצלחה ב-${time}`);
+    showToast('✅ הדו"ח נשלח במייל!');
+  } catch (e) {
+    try { localStorage.setItem(QUEUE_KEY, JSON.stringify(payload)); } catch (e2) {}
+    setSendStatus('⚠️ אין חיבור — הדו"ח יישלח אוטומטית כשהאינטרנט יחזור', true);
+    showToast('⚠️ השליחה נכשלה — יישלח שוב אוטומטית');
+  }
+}
+
+async function retryPendingReport() {
+  if (!REPORT_ENDPOINT) return;
+  let p; try { p = JSON.parse(localStorage.getItem(QUEUE_KEY) || 'null'); } catch (e) { return; }
+  if (!p) return;
+  try {
+    await postReport(p);
+    localStorage.removeItem(QUEUE_KEY);
+    setSendStatus('✅ דו"ח שהמתין נשלח בהצלחה');
+    showToast('✅ דו"ח שהמתין נשלח!');
+  } catch (e) {}
+}
+window.addEventListener('online', retryPendingReport);
+retryPendingReport();
 
 /* ── Word report ─────────────────────────────────────────────────────── */
 async function loadHtmlDocx() {
