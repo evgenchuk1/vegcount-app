@@ -1,4 +1,4 @@
-const CACHE = 'vegcount-v15';
+const CACHE = 'vegcount-v16';
 const ASSETS = ['./', './index.html', './manifest.json', './xlsx-report.js',
   './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
