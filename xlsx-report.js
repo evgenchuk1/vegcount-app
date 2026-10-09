@@ -148,7 +148,7 @@
       const kg = ws.getCell(r, o + 5);
       if (it.extra) kg.value = it.kg || null;
       else if (it.boxes > 0 && it.coeff) kg.value = { formula: `${colL(o + 3)}${r}*${colL(o + 4)}${r}`, result: r1(it.kg) };
-      else if (it.boxes > 0 && /\(יח'?\)/.test(it.name)) kg.value = `${it.boxes} יח'`;   // per-unit item
+      else if (it.boxes > 0 && (it.unit || /\(יח'?\)/.test(it.name))) kg.value = `${it.boxes} יח'`;   // per-unit item
       kg.numFmt = '0.0';
       kg.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
       kg.font = has ? { name: 'Arial', size: 16, bold: true, color: { argb: 'FF000000' } } : txt;

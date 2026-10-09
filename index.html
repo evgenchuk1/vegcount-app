@@ -69,6 +69,15 @@ body {
   transition:border-color .2s,background .2s;
 }
 .product-row.filled { border-color:#66BB6A; background:#F1F8F1; }
+/* sold per unit / package — darker card + star in the corner */
+.product-row.unit { position:relative; background:#E4EAE4; border-color:#C5CFC5; }
+.product-row.unit.filled { background:#D7E8D7; border-color:#66BB6A; }
+.product-row.unit::before {
+  content:'★'; position:absolute; top:-1px; right:3px;
+  font-size:15px; line-height:1; color:#F9A825; text-shadow:0 1px 1px rgba(0,0,0,.25);
+}
+.unit-legend { font-size:12px; color:#666; padding:6px 16px 0; }
+.unit-legend b { color:#F9A825; font-size:14px; }
 
 .product-top {
   display:flex; justify-content:space-between; align-items:center;
@@ -80,7 +89,12 @@ body {
   flex:1; min-width:0;
 }
 .product-emoji { font-size:26px; flex-shrink:0; }
-.product-label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.product-label { display:flex; flex-direction:column; min-width:0; }
+.product-label .he { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.product-label .en {
+  font-size:12px; font-weight:400; color:#777; line-height:1.2;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; unicode-bidi:plaintext;
+}
 
 /* barcode */
 .barcode-section { flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:4px; }
@@ -254,7 +268,7 @@ body {
 }
 .row-highlight { animation:row-flash 1.8s ease-out forwards; }
 
-/* ── Alphabet wheel (3D drum) ──────────────────────────── */
+/* ── Alphabet wheel (native-scroll drum: light enough for iPhone) ── */
 .btn-abc {
   background:rgba(255,255,255,.95); border:none; color:#1B5E20;
   border-radius:12px; width:46px; height:40px; cursor:pointer;
@@ -264,41 +278,44 @@ body {
 .btn-abc:active { transform:translateY(2px); box-shadow:0 1px 0 #A5D6A7; }
 .abc-overlay {
   display:none; position:fixed; inset:0; z-index:500;
-  background:radial-gradient(circle at 50% 45%, rgba(27,94,32,.55), rgba(0,0,0,.82));
-  -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
+  background:radial-gradient(circle at 50% 45%, #2e5d31, #0b1a0c);   /* opaque: no backdrop blur */
   flex-direction:column; align-items:center; justify-content:center;
-  touch-action:none; user-select:none; -webkit-user-select:none;
+  user-select:none; -webkit-user-select:none; overscroll-behavior:contain;
 }
 .abc-overlay.open { display:flex; }
 .abc-cat {
-  display:flex; background:rgba(255,255,255,.15); border-radius:30px; padding:4px; margin-bottom:14px;
+  display:flex; background:rgba(255,255,255,.15); border-radius:30px; padding:4px; margin-bottom:10px;
 }
 .abc-cat button {
   border:none; background:none; color:white; font-family:inherit;
-  font-size:18px; font-weight:700; padding:10px 22px; border-radius:26px; cursor:pointer;
+  font-size:17px; font-weight:700; padding:9px 18px; border-radius:26px; cursor:pointer;
 }
 .abc-cat button.on { background:white; color:#1B5E20; box-shadow:0 2px 8px rgba(0,0,0,.3); }
 .abc-stage {
-  position:relative; width:min(78vw,300px); height:min(62vh,470px);
-  perspective:900px; perspective-origin:50% 50%;
+  position:relative; width:min(78vw,300px); height:min(56vh,440px);
+  border-radius:14px; background:#1f2b20; box-shadow:inset 0 0 0 2px rgba(0,0,0,.4);
 }
-.abc-stage::before, .abc-stage::after {   /* drum end caps / rails */
-  content:''; position:absolute; top:4%; bottom:4%; width:16px; border-radius:8px; z-index:2;
+.abc-stage::before, .abc-stage::after {   /* drum rails */
+  content:''; position:absolute; top:4%; bottom:4%; width:16px; border-radius:8px; z-index:4;
   background:linear-gradient(90deg,#5d4037,#d7ccc8 45%,#8d6e63 55%,#3e2723);
-  box-shadow:0 0 12px rgba(0,0,0,.6);
+  box-shadow:0 0 12px rgba(0,0,0,.6); pointer-events:none;
 }
 .abc-stage::before { right:-10px; } .abc-stage::after { left:-10px; }
-.abc-drum {
-  position:absolute; inset:0; transform-style:preserve-3d;
+.abc-list {
+  position:absolute; inset:0; overflow-y:scroll; overflow-x:hidden;
+  scroll-snap-type:y mandatory; -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain; touch-action:pan-y; scrollbar-width:none;
+  border-radius:14px;
 }
+.abc-list::-webkit-scrollbar { display:none; }
 .abc-face {
-  position:absolute; left:6px; right:6px; top:50%; height:76px; margin-top:-38px;
+  height:76px; margin:0 6px; scroll-snap-align:center;
   display:flex; align-items:center; justify-content:center; gap:14px;
-  backface-visibility:hidden; -webkit-backface-visibility:hidden;
   background:linear-gradient(180deg,#fafafa 0%,#e8f5e9 45%,#c8e6c9 100%);
   border-top:1px solid rgba(255,255,255,.9); border-bottom:1px solid rgba(0,0,0,.25);
-  color:#1B5E20; font-size:54px; font-weight:900; cursor:pointer;
+  color:#1B5E20; font-size:50px; font-weight:900; cursor:pointer;
   text-shadow:0 2px 0 #fff, 0 3px 3px rgba(0,0,0,.3);
+  will-change:transform;
 }
 .abc-face .cnt {
   font-size:15px; font-weight:700; color:#2E7D32; background:white;
@@ -307,7 +324,7 @@ body {
 .abc-face.empty { color:#a5b6a6; }
 .abc-face.empty .cnt { display:none; }
 .abc-shade {      /* cylinder lighting */
-  position:absolute; inset:0; pointer-events:none; z-index:1; border-radius:10px;
+  position:absolute; inset:0; pointer-events:none; z-index:2; border-radius:14px;
   background:linear-gradient(180deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,0) 32%,rgba(0,0,0,0) 68%,rgba(0,0,0,.85) 100%);
 }
 .abc-window {     /* selection lens */
@@ -315,12 +332,35 @@ body {
   border:3px solid #FFD54F; border-radius:16px; pointer-events:none; z-index:3;
   box-shadow:0 0 0 2px rgba(0,0,0,.25), 0 0 22px rgba(255,213,79,.6), inset 0 0 14px rgba(255,213,79,.35);
 }
-.abc-hint { color:rgba(255,255,255,.85); font-size:14px; margin-top:16px; text-align:center; }
+.abc-hint { color:rgba(255,255,255,.85); font-size:14px; margin-top:14px; text-align:center; }
 .abc-close {
   position:absolute; top:max(18px, env(safe-area-inset-top)); left:18px;
   width:46px; height:46px; border-radius:50%; border:none; cursor:pointer;
   background:rgba(255,255,255,.2); color:white; font-size:24px;
 }
+.abc-results {
+  display:none; width:min(88vw,360px); max-height:min(56vh,440px); overflow-y:auto;
+  overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
+  background:white; border-radius:14px; box-shadow:0 6px 24px rgba(0,0,0,.4);
+}
+.abc-results.open { display:block; }
+.abc-results .res-head {
+  position:sticky; top:0; background:#1B5E20; color:white; padding:10px 14px;
+  font-size:18px; font-weight:800; display:flex; justify-content:space-between; align-items:center;
+}
+.abc-results .res-head button {
+  border:none; background:rgba(255,255,255,.2); color:white; border-radius:16px;
+  padding:5px 12px; font-family:inherit; font-size:14px; cursor:pointer;
+}
+.abc-results .res-item {
+  display:flex; align-items:center; gap:10px; padding:11px 14px;
+  border-bottom:1px solid #EEE; cursor:pointer;
+}
+.abc-results .res-item:active { background:#E8F5E9; }
+.abc-results .res-item .em { font-size:24px; }
+.abc-results .res-item .nm { display:flex; flex-direction:column; min-width:0; }
+.abc-results .res-item .nm b { font-size:16px; direction:ltr; text-align:right; }
+.abc-results .res-item .nm span { font-size:13px; color:#666; }
 
 /* ── Finish & send ─────────────────────────────────────── */
 .btn-action.finish {
@@ -348,7 +388,7 @@ body {
   </div>
   <div class="search-bar" id="searchBar">
     <input type="text" class="search-input-field" id="searchInput"
-      placeholder="חפש ירק / פרי..."
+      placeholder="חפש ירק / פרי... / Search"
       oninput="onSearchInput(this.value)"
       onkeydown="if(event.key==='Escape')toggleSearch()">
     <div class="search-suggestions" id="searchSuggestions"></div>
@@ -359,6 +399,7 @@ body {
   <span class="label">פריטים שנספרו:</span>
   <span class="count" id="total-count">0</span>
 </div>
+<div class="unit-legend"><b>★</b> רקע כהה = נמכר ביחידות / באריזה (לא לפי משקל)</div>
 
 <div class="install-banner" id="installBanner">
   <span class="ib-icon">📲</span>
@@ -408,12 +449,17 @@ body {
     <button id="abcCatV" class="on" onclick="setAbcCat('v')">🥕 ירקות</button>
     <button id="abcCatF" onclick="setAbcCat('f')">🍎 פירות</button>
   </div>
+  <div class="abc-cat">
+    <button id="abcLangHe" class="on" onclick="setAbcLang('he')">א–ת עברית</button>
+    <button id="abcLangEn" onclick="setAbcLang('en')">A–Z English</button>
+  </div>
   <div class="abc-stage" id="abcStage">
-    <div class="abc-drum" id="abcDrum"></div>
+    <div class="abc-list" id="abcList"></div>
     <div class="abc-shade"></div>
     <div class="abc-window"></div>
   </div>
-  <div class="abc-hint">גלגל למעלה / למטה ולחץ על אות</div>
+  <div class="abc-results" id="abcResults"></div>
+  <div class="abc-hint" id="abcHint">גלגל למעלה / למטה ולחץ על אות</div>
 </div>
 
 <script src="xlsx-report.js"></script>
@@ -431,152 +477,189 @@ const BARCODE_SVG = `<svg width="20" height="13" viewBox="0 0 20 13" fill="curre
 
 /* ── Data — ירקות sorted א–ת ──────────────────────────── */
 const vegetables = [
-  {id:'v0',  name:'ארטישוק',                      emoji:'🌿', coeff:16,   barcode:'barcodes/artichoke.gif', ean:'7290000000312'},
-  {id:'v1',  name:'בטטה',                          emoji:'🍠', coeff:15.6, barcode:'barcodes/sweet-potato.gif', ean:'7290000000428'},
-  {id:'v2',  name:'בטטה ארוזה',                    emoji:'🍠', coeff:12,   barcode:'barcodes/sweet-potato-baby.gif', ean:'7290000961767'},
-  {id:'v3',  name:'בצל אדום',                      emoji:'🧅', coeff:15.3, barcode:'barcodes/onion-red.gif', ean:'7290000001036'},
-  {id:'v4',  name:'בצל יבש',                       emoji:'🧅', coeff:14.4, barcode:'barcodes/onion-dry.gif', ean:'7290000000480'},
-  {id:'v44', name:'בצל ירוק',                      emoji:'🌿', coeff:null, barcode:'barcodes/onion-green.gif', ean:'7290000000664'},
-  {id:'v45', name:'בצלצלי שאלוט',                  emoji:'🧅', coeff:null, barcode:'barcodes/shallots.gif', ean:'7290010650033'},
-  {id:'v5',  name:"ברוקולי ארוז (יח')",            emoji:'🥦', coeff:null, barcode:'barcodes/broccoli-packed.gif', ean:'7296073373476'},
-  {id:'v6',  name:'גזר',                            emoji:'🥕', coeff:13,   barcode:'barcodes/carrot-packed.gif', ean:'7296073153238'},
-  {id:'v7',  name:'דלורית',                         emoji:'🎃', coeff:14.15, barcode:'barcodes/butternut.gif', ean:'7290000000732'},
-  {id:'v8',  name:"דלעת ארוזה (קג')",              emoji:'🎃', coeff:7.8,  barcode:'barcodes/pumpkin-packed.gif', ean:'7296073342496'},
-  {id:'v9',  name:'חציל',                           emoji:'🍆', coeff:14,   barcode:'barcodes/eggplant.gif', ean:'7290000000114'},
-  {id:'v10', name:'חציל בלאדי',                    emoji:'🍆', coeff:14.34, barcode:'barcodes/eggplant-baladi.gif', ean:'7290000962474'},
-  {id:'v11', name:'כרוב אדום',                     emoji:'🥬', coeff:10,   barcode:'barcodes/cabbage-red.gif', ean:'7290000000145'},
-  {id:'v12', name:'כרוב לבן',                      emoji:'🥬', coeff:9.6,  barcode:'barcodes/cabbage-white.gif', ean:'7290000000138'},
-  {id:'v13', name:'כרובית',                         emoji:'🥦', coeff:9,    barcode:'barcodes/cauliflower.gif', ean:'7290000000176'},
-  {id:'v46', name:'כרישה',                          emoji:'🌿', coeff:null, barcode:'barcodes/leek.gif', ean:'7296073706526'},
-  {id:'v14', name:'לפת',                            emoji:'🥔', coeff:null, barcode:null, barcodeNum:'7290000000190'},
-  {id:'v15', name:'מלפפון',                         emoji:'🥒', coeff:13.5, barcode:'barcodes/cucumber.gif', ean:'7290000000046'},
-  {id:'v16', name:"מלפפון בייבי (יח')",            emoji:'🥒', coeff:null, barcode:'barcodes/cucumber-baby.gif', ean:'7290012086007'},
-  {id:'v17', name:'סלק',                            emoji:'🌺', coeff:null, barcode:'barcodes/beet.gif', ean:'7290000000183'},
-  {id:'v18', name:"סלק אדום ארוז (יח')",           emoji:'🌺', coeff:null, barcode:null},
-  {id:'v48', name:'סלק מבושל בווקואום',             emoji:'🌺', coeff:null, barcode:null, barcodeNum:'7290020423054'},
-  {id:'v19', name:'עגבניות',                        emoji:'🍅', coeff:null, barcode:'barcodes/tomato.gif', ean:'7290000000022'},
-  {id:'v20', name:'פלפל אדום',                     emoji:'🫑', coeff:12,   barcode:'barcodes/pepper-red.gif', ean:'7290000000091'},
-  {id:'v21', name:'פלפל ירוק',                     emoji:'🫑', coeff:11.6, barcode:'barcodes/pepper-green.gif', ean:'7290000000107'},
-  {id:'v22', name:'פלפל ירוק חריף',                emoji:'🌶️', coeff:9.4,  barcode:'barcodes/pepper-green-hot.gif', ean:'7290000000619'},
-  {id:'v23', name:'פלפל כתום',                     emoji:'🫑', coeff:13,   barcode:'barcodes/pepper-orange.gif', ean:'7290000961552'},
-  {id:'v49', name:'פלפל מתוק ארוז',               emoji:'🫑', coeff:null, barcode:'barcodes/pepper-sweet-packed.gif', ean:'7296073417446'},
-  {id:'v24', name:'פלפל צהוב',                     emoji:'🫑', coeff:13,   barcode:'barcodes/pepper-yellow.gif', ean:'7290000000855'},
-  {id:'v25', name:'פלפל שישקה מתוק',               emoji:'🫑', coeff:7,    barcode:'barcodes/pepper-shishka.gif', ean:'7290000000749'},
-  {id:'v26', name:'צוקיני',                         emoji:'🥒', coeff:14,   barcode:null, barcodeNum:'7290000000824'},
-  {id:'v27', name:"צוקיני ארוז (קג')",             emoji:'🥒', coeff:13.4, barcode:null, barcodeNum:'7296073417439'},
-  {id:'v50', name:'צנונית 400 גרם',                 emoji:'🥬', coeff:null, barcode:'barcodes/radish-400g.gif', ean:'7296073413424'},
-  {id:'v28', name:'קולרבי',                         emoji:'🥬', coeff:14,   barcode:null, barcodeNum:'7290000000220'},
-  {id:'v29', name:'קישוא',                          emoji:'🥒', coeff:14,   barcode:'barcodes/kishoa.gif', ean:'7290000000053'},
-  {id:'v30', name:'שום',                            emoji:'🧄', coeff:null, barcode:null, barcodeNum:'6935325410118'},
-  {id:'v31', name:'שומר',                           emoji:'🌿', coeff:9.6,  barcode:'barcodes/fennel.gif', ean:'7290000000572'},
-  {id:'v51', name:"שורש ג'ינג'ר",                  emoji:'🌿', coeff:null, barcode:'barcodes/ginger.gif', ean:'7290000961606'},
-  {id:'v32', name:"שרי כתום (יח')",                emoji:'🍅', coeff:null, barcode:null},
-  {id:'v33', name:"שרי לובלו (יח')",               emoji:'🍅', coeff:null, barcode:'barcodes/tomato-cherry-lulav.gif', ean:'7290000993294'},
-  {id:'v34', name:"שרי עגבניות אדומות (יח')",      emoji:'🍅', coeff:null, barcode:'barcodes/tomato-cherry-red.gif', ean:'7290011887766'},
-  {id:'v35', name:"שרי עגבניות מיקס (יח')",        emoji:'🍅', coeff:null, barcode:'barcodes/tomato-cherry-mix.gif', ean:'7290015766043'},
-  {id:'v36', name:"שרי עגול (יח')",                emoji:'🍅', coeff:null, barcode:null, barcodeNum:'7290000000916'},
-  {id:'v37', name:"שרי צהוב (יח')",                emoji:'🍅', coeff:null, barcode:'barcodes/tomato-cherry-yellow.gif', ean:'7290000993461'},
-  {id:'v38', name:"שרי תמר (יח')",                 emoji:'🍅', coeff:null, barcode:null, barcodeNum:'7290002766056'},
-  {id:'v39', name:'תפוח אדמה אגו שף',              emoji:'🥔', coeff:14.4, barcode:'barcodes/potato-ego-chef.gif', ean:'7290018619308'},
-  {id:'v40', name:'תפוח אדמה אדום',                emoji:'🥔', coeff:20,   barcode:'barcodes/potato-red.gif', ean:'7290000001692'},
-  {id:'v41', name:'תפוח אדמה לבן',                 emoji:'🥔', coeff:20,   barcode:'barcodes/potato-white.gif', ean:'7290000001715'},
-  {id:'v42', name:'תפוח אדמה לבן בייבי יפרו',      emoji:'🥔', coeff:13.5, barcode:'barcodes/potato-white-baby.gif', ean:'7290018791127'},
-  {id:'v43', name:'תפוח אדמה קטן ארוז',            emoji:'🥔', coeff:16,   barcode:'barcodes/potato-small-packed.gif', ean:'7290000000503'},
-  {id:'v53', name:"עגבניות צ'רי מגי",              emoji:'🍅', coeff:null, barcode:null, barcodeNum:'7290019600077'},
-  {id:'v54', name:'פלפל ירוק בהיר',                emoji:'🫑', coeff:null, barcode:null, barcodeNum:'7290000000084'},
-  {id:'v55', name:'תירס מתוק לבן',                 emoji:'🌽', coeff:null, barcode:null, barcodeNum:'7296073596455'},
-  {id:'v56', name:'תירס צמח',                       emoji:'🌽', coeff:null, barcode:null, barcodeNum:'7290018115121'},
-  {id:'v57', name:'תירס בחוף',                       emoji:'🌽', coeff:null, barcode:null, barcodeNum:'7290000000848'},
-  {id:'v58', name:"דלעת ערמונים", emoji:'🎃', coeff:11.6, barcode:null, barcodeNum:'7290000992563'},
-  {id:'v59', name:"פלפל רמירו", emoji:'🌶️', coeff:7.7, barcode:null, barcodeNum:'7290000961309'},
-  {id:'v60', name:"ארטישוק ירושלמי", emoji:'🥔', coeff:9, barcode:null, barcodeNum:'7290000000589'},
-  {id:'v61', name:"בטטה בייבי", emoji:'🍠', coeff:7.35, barcode:null, barcodeNum:'7290016980103'},
-  {id:'v62', name:"תירס ארוז", emoji:'🌽', coeff:10, barcode:null, barcodeNum:'7296073288756'},
-  {id:'v63', name:"מלפפון בייבי משפחתי (יח')", emoji:'🥒', coeff:null, barcode:null, barcodeNum:'7290019600701'},
-  {id:'v64', name:"שרי אשכולות מובחר (יח')", emoji:'🍅', coeff:null, barcode:null, barcodeNum:'7290012086113'},
-  {id:'v65', name:"שרי ויטני (יח')", emoji:'🍅', coeff:null, barcode:null, barcodeNum:'7296073323587'},
-  {id:'v66', name:"שרי מנומר (יח')", emoji:'🍅', coeff:null, barcode:null, barcodeNum:'7296073380153'},
-  {id:'v67', name:"שרי שוקו (יח')", emoji:'🍅', coeff:null, barcode:null, barcodeNum:'7290000993560'},
-  {id:'v68', name:"קוביות סלק מבושל בווקואום (יח')", emoji:'🌺', coeff:null, barcode:null, barcodeNum:'7290020423047'},
+  {id:'v0',  name:'ארטישוק',                      emoji:'🌿', coeff:16,   barcode:'barcodes/artichoke.gif', ean:'7290000000312', en:'Artichoke'},
+  {id:'v1',  name:'בטטה',                          emoji:'🍠', coeff:15.6, barcode:'barcodes/sweet-potato.gif', ean:'7290000000428', en:'Sweet potato'},
+  {id:'v2',  name:'בטטה ארוזה',                    emoji:'🍠', coeff:12,   barcode:'barcodes/sweet-potato-baby.gif', ean:'7290000961767', en:'Sweet potato, packed'},
+  {id:'v3',  name:'בצל אדום',                      emoji:'🧅', coeff:15.3, barcode:'barcodes/onion-red.gif', ean:'7290000001036', en:'Red onion'},
+  {id:'v4',  name:'בצל יבש',                       emoji:'🧅', coeff:14.4, barcode:'barcodes/onion-dry.gif', ean:'7290000000480', en:'Dry onion'},
+  {id:'v44', name:'בצל ירוק',                      emoji:'🌿', coeff:null, barcode:'barcodes/onion-green.gif', ean:'7290000000664', en:'Green onion'},
+  {id:'v45', name:'בצלצלי שאלוט',                  emoji:'🧅', coeff:null, barcode:'barcodes/shallots.gif', ean:'7290010650033', en:'Shallots', unit:true},
+  {id:'v5',  name:"ברוקולי ארוז (יח')",            emoji:'🥦', coeff:null, barcode:'barcodes/broccoli-packed.gif', ean:'7296073373476', en:'Broccoli, packed', unit:true},
+  {id:'v6',  name:'גזר',                            emoji:'🥕', coeff:13,   barcode:'barcodes/carrot-packed.gif', ean:'7296073153238', en:'Carrot'},
+  {id:'v7',  name:'דלורית',                         emoji:'🎃', coeff:14.15, barcode:'barcodes/butternut.gif', ean:'7290000000732', en:'Butternut squash'},
+  {id:'v8',  name:"דלעת ארוזה (קג')",              emoji:'🎃', coeff:7.8,  barcode:'barcodes/pumpkin-packed.gif', ean:'7296073342496', en:'Pumpkin, packed'},
+  {id:'v9',  name:'חציל',                           emoji:'🍆', coeff:14,   barcode:'barcodes/eggplant.gif', ean:'7290000000114', en:'Eggplant'},
+  {id:'v10', name:'חציל בלאדי',                    emoji:'🍆', coeff:14.34, barcode:'barcodes/eggplant-baladi.gif', ean:'7290000962474', en:'Baladi eggplant'},
+  {id:'v11', name:'כרוב אדום',                     emoji:'🥬', coeff:10,   barcode:'barcodes/cabbage-red.gif', ean:'7290000000145', en:'Red cabbage'},
+  {id:'v12', name:'כרוב לבן',                      emoji:'🥬', coeff:9.6,  barcode:'barcodes/cabbage-white.gif', ean:'7290000000138', en:'White cabbage'},
+  {id:'v13', name:'כרובית',                         emoji:'🥦', coeff:9,    barcode:'barcodes/cauliflower.gif', ean:'7290000000176', en:'Cauliflower'},
+  {id:'v46', name:'כרישה',                          emoji:'🌿', coeff:null, barcode:'barcodes/leek.gif', ean:'7296073706526', en:'Leek', unit:true},
+  {id:'v14', name:'לפת',                            emoji:'🥔', coeff:null, barcode:null, barcodeNum:'7290000000190', en:'Turnip'},
+  {id:'v15', name:'מלפפון',                         emoji:'🥒', coeff:13.5, barcode:'barcodes/cucumber.gif', ean:'7290000000046', en:'Cucumber'},
+  {id:'v16', name:"מלפפון בייבי (יח')",            emoji:'🥒', coeff:null, barcode:'barcodes/cucumber-baby.gif', ean:'7290012086007', en:'Baby cucumber', unit:true},
+  {id:'v17', name:'סלק',                            emoji:'🌺', coeff:null, barcode:'barcodes/beet.gif', ean:'7290000000183', en:'Beetroot'},
+  {id:'v18', name:"סלק אדום ארוז (יח')",           emoji:'🌺', coeff:null, barcode:null, en:'Red beetroot, packed', unit:true},
+  {id:'v48', name:'סלק מבושל בווקואום',             emoji:'🌺', coeff:null, barcode:null, barcodeNum:'7290020423054', en:'Cooked beetroot, vacuum-packed', unit:true},
+  {id:'v19', name:'עגבניות',                        emoji:'🍅', coeff:null, barcode:'barcodes/tomato.gif', ean:'7290000000022', en:'Tomatoes'},
+  {id:'v20', name:'פלפל אדום',                     emoji:'🫑', coeff:12,   barcode:'barcodes/pepper-red.gif', ean:'7290000000091', en:'Red pepper'},
+  {id:'v21', name:'פלפל ירוק',                     emoji:'🫑', coeff:11.6, barcode:'barcodes/pepper-green.gif', ean:'7290000000107', en:'Green pepper'},
+  {id:'v22', name:'פלפל ירוק חריף',                emoji:'🌶️', coeff:9.4,  barcode:'barcodes/pepper-green-hot.gif', ean:'7290000000619', en:'Hot green pepper'},
+  {id:'v23', name:'פלפל כתום',                     emoji:'🫑', coeff:13,   barcode:'barcodes/pepper-orange.gif', ean:'7290000961552', en:'Orange pepper'},
+  {id:'v49', name:'פלפל מתוק ארוז',               emoji:'🫑', coeff:null, barcode:'barcodes/pepper-sweet-packed.gif', ean:'7296073417446', en:'Sweet peppers, packed', unit:true},
+  {id:'v24', name:'פלפל צהוב',                     emoji:'🫑', coeff:13,   barcode:'barcodes/pepper-yellow.gif', ean:'7290000000855', en:'Yellow pepper'},
+  {id:'v25', name:'פלפל שישקה מתוק',               emoji:'🫑', coeff:7,    barcode:'barcodes/pepper-shishka.gif', ean:'7290000000749', en:'Shishka sweet pepper'},
+  {id:'v26', name:'צוקיני',                         emoji:'🥒', coeff:14,   barcode:null, barcodeNum:'7290000000824', en:'Zucchini'},
+  {id:'v27', name:"צוקיני ארוז (קג')",             emoji:'🥒', coeff:13.4, barcode:null, barcodeNum:'7296073417439', en:'Zucchini, packed'},
+  {id:'v50', name:'צנונית 400 גרם',                 emoji:'🥬', coeff:null, barcode:'barcodes/radish-400g.gif', ean:'7296073413424', en:'Radish 400 g', unit:true},
+  {id:'v28', name:'קולרבי',                         emoji:'🥬', coeff:14,   barcode:null, barcodeNum:'7290000000220', en:'Kohlrabi'},
+  {id:'v29', name:'קישוא',                          emoji:'🥒', coeff:14,   barcode:'barcodes/kishoa.gif', ean:'7290000000053', en:'Kishu squash'},
+  {id:'v30', name:'שום',                            emoji:'🧄', coeff:null, barcode:null, barcodeNum:'6935325410118', en:'Garlic', unit:true},
+  {id:'v31', name:'שומר',                           emoji:'🌿', coeff:9.6,  barcode:'barcodes/fennel.gif', ean:'7290000000572', en:'Fennel'},
+  {id:'v51', name:"שורש ג'ינג'ר",                  emoji:'🌿', coeff:null, barcode:'barcodes/ginger.gif', ean:'7290000961606', en:'Ginger root'},
+  {id:'v32', name:"שרי כתום (יח')",                emoji:'🍅', coeff:null, barcode:null, en:'Orange cherry tomatoes', unit:true},
+  {id:'v33', name:"שרי לובלו (יח')",               emoji:'🍅', coeff:null, barcode:'barcodes/tomato-cherry-lulav.gif', ean:'7290000993294', en:'Lobello cherry tomatoes', unit:true},
+  {id:'v34', name:"שרי עגבניות אדומות (יח')",      emoji:'🍅', coeff:null, barcode:'barcodes/tomato-cherry-red.gif', ean:'7290011887766', en:'Red cherry tomatoes', unit:true},
+  {id:'v35', name:"שרי עגבניות מיקס (יח')",        emoji:'🍅', coeff:null, barcode:'barcodes/tomato-cherry-mix.gif', ean:'7290015766043', en:'Mixed cherry tomatoes', unit:true},
+  {id:'v36', name:"שרי עגול (יח')",                emoji:'🍅', coeff:null, barcode:null, barcodeNum:'7290000000916', en:'Round cherry tomatoes', unit:true},
+  {id:'v37', name:"שרי צהוב (יח')",                emoji:'🍅', coeff:null, barcode:'barcodes/tomato-cherry-yellow.gif', ean:'7290000993461', en:'Yellow cherry tomatoes', unit:true},
+  {id:'v38', name:"שרי תמר (יח')",                 emoji:'🍅', coeff:null, barcode:null, barcodeNum:'7290002766056', en:'Date cherry tomatoes', unit:true},
+  {id:'v39', name:'תפוח אדמה אגו שף',              emoji:'🥔', coeff:14.4, barcode:'barcodes/potato-ego-chef.gif', ean:'7290018619308', en:'Potato, Ego Chef'},
+  {id:'v40', name:'תפוח אדמה אדום',                emoji:'🥔', coeff:20,   barcode:'barcodes/potato-red.gif', ean:'7290000001692', en:'Red potato'},
+  {id:'v41', name:'תפוח אדמה לבן',                 emoji:'🥔', coeff:20,   barcode:'barcodes/potato-white.gif', ean:'7290000001715', en:'White potato'},
+  {id:'v42', name:'תפוח אדמה לבן בייבי יפרו',      emoji:'🥔', coeff:13.5, barcode:'barcodes/potato-white-baby.gif', ean:'7290018791127', en:'Baby white potato, Yafro'},
+  {id:'v43', name:'תפוח אדמה קטן ארוז',            emoji:'🥔', coeff:16,   barcode:'barcodes/potato-small-packed.gif', ean:'7290000000503', en:'Small potatoes, packed'},
+  {id:'v53', name:"עגבניות צ'רי מגי",              emoji:'🍅', coeff:null, barcode:null, barcodeNum:'7290019600077', en:'Maggie cherry tomatoes', unit:true},
+  {id:'v54', name:'פלפל ירוק בהיר',                emoji:'🫑', coeff:null, barcode:null, barcodeNum:'7290000000084', en:'Light green pepper'},
+  {id:'v55', name:'תירס מתוק לבן',                 emoji:'🌽', coeff:null, barcode:null, barcodeNum:'7296073596455', en:'White sweet corn', unit:true},
+  {id:'v56', name:'תירס צמח',                       emoji:'🌽', coeff:null, barcode:null, barcodeNum:'7290018115121', en:'Corn, Tzemach', unit:true},
+  {id:'v57', name:'תירס בחוף',                       emoji:'🌽', coeff:null, barcode:null, barcodeNum:'7290000000848', en:'Corn, Bahof'},
+  {id:'v58', name:"דלעת ערמונים", emoji:'🎃', coeff:11.6, barcode:null, barcodeNum:'7290000992563', en:'Chestnut squash'},
+  {id:'v59', name:"פלפל רמירו", emoji:'🌶️', coeff:7.7, barcode:null, barcodeNum:'7290000961309', en:'Ramiro pepper'},
+  {id:'v60', name:"ארטישוק ירושלמי", emoji:'🥔', coeff:9, barcode:null, barcodeNum:'7290000000589', en:'Jerusalem artichoke'},
+  {id:'v61', name:"בטטה בייבי", emoji:'🍠', coeff:7.35, barcode:null, barcodeNum:'7290016980103', en:'Baby sweet potato'},
+  {id:'v62', name:"תירס ארוז", emoji:'🌽', coeff:10, barcode:null, barcodeNum:'7296073288756', en:'Corn, packed'},
+  {id:'v63', name:"מלפפון בייבי משפחתי (יח')", emoji:'🥒', coeff:null, barcode:null, barcodeNum:'0608614340606', en:'Baby cucumber, family pack', unit:true},
+  {id:'v64', name:"שרי אשכולות מובחר (יח')", emoji:'🍅', coeff:null, barcode:null, barcodeNum:'7290012086113', en:'Cherry tomatoes on the vine, premium', unit:true},
+  {id:'v65', name:"שרי ויטני (יח')", emoji:'🍅', coeff:null, barcode:null, barcodeNum:'7296073323587', en:'Whitney cherry tomatoes', unit:true},
+  {id:'v66', name:"שרי מנומר (יח')", emoji:'🍅', coeff:null, barcode:null, barcodeNum:'7296073380153', en:'Speckled cherry tomatoes', unit:true},
+  {id:'v67', name:"שרי שוקו (יח')", emoji:'🍅', coeff:null, barcode:null, barcodeNum:'7290000993560', en:'Choco cherry tomatoes', unit:true},
+  {id:'v68', name:"קוביות סלק מבושל בווקואום (יח')", emoji:'🌺', coeff:null, barcode:null, barcodeNum:'7290020423047', en:'Cooked beet cubes, vacuum-packed', unit:true},
+  {id:'v69', name:"פטריות מלך היער (מארז)", emoji:'🍄', coeff:null, barcode:null, barcodeNum:'7290018394021', en:'King oyster mushrooms, pack', unit:true},
+  {id:'v70', name:"פטריות בייבי מלך היער (מארז)", emoji:'🍄', coeff:null, barcode:null, barcodeNum:'7290010650958', en:'Baby king oyster mushrooms, pack', unit:true},
+  {id:'v71', name:"פטריות פורטובלה בייבי מיני 300 גרם", emoji:'🍄', coeff:null, barcode:null, barcodeNum:'7290020174949', en:'Mini baby portobello mushrooms 300 g', unit:true},
+  {id:'v72', name:"פטריות פורטובלו 300 גרם", emoji:'🍄', coeff:null, barcode:null, barcodeNum:'7290112841926', en:'Portobello mushrooms 300 g', unit:true},
+  {id:'v73', name:"פטריות מיקס אקזוטי (מארז)", emoji:'🍄', coeff:null, barcode:null, barcodeNum:'7290018394151', en:'Exotic mushroom mix, pack', unit:true},
+  {id:'v74', name:"פטריות טריו אקזוטי (מארז)", emoji:'🍄', coeff:null, barcode:null, barcodeNum:'7290018394359', en:'Exotic mushroom trio, pack', unit:true},
+  {id:'v75', name:"פטריות שימג'י חומות (מארז)", emoji:'🍄', coeff:null, barcode:null, barcodeNum:'7290010650996', en:'Brown shimeji mushrooms, pack', unit:true},
+  {id:'v76', name:"פטריות שימג'י לבנות (מארז)", emoji:'🍄', coeff:null, barcode:null, barcodeNum:'7290010650828', en:'White shimeji mushrooms, pack', unit:true},
+  {id:'v77', name:"פטריות שינוקי (מארז)", emoji:'🍄', coeff:null, barcode:null, barcodeNum:'7290010650576', en:'Shinoki mushrooms, pack', unit:true},
+  {id:'v78', name:"פטריות שמפיניון צמד 600 גרם", emoji:'🍄', coeff:null, barcode:null, barcodeNum:'7290112841940', en:'Champignon mushrooms, twin pack 600 g', unit:true},
+  {id:'v79', name:"פטריות שמפיניון לבן דואט 600 גרם", emoji:'🍄', coeff:null, barcode:null, barcodeNum:'7290013215925', en:'White champignon duo 600 g', unit:true},
+  {id:'v80', name:"פטריות פורטובלה ושמפיניון דואט 600 גרם", emoji:'🍄', coeff:null, barcode:null, barcodeNum:'7290112841957', en:'Portobello & champignon duo 600 g', unit:true},
+  {id:'v81', name:"פטריות חומות דואט 600 גרם", emoji:'🍄', coeff:null, barcode:null, barcodeNum:'7290013215901', en:'Brown mushroom duo 600 g', unit:true},
+  {id:'v82', name:"חסה לאליק צבעונית 200 גרם", emoji:'🥬', coeff:null, barcode:null, barcodeNum:'7296073592884', en:'Colorful Lalique lettuce 200 g', unit:true},
+  {id:'v83', name:"חסה לאליק הידרופונית 190 גרם", emoji:'🥬', coeff:null, barcode:null, barcodeNum:'7296073495758', en:'Hydroponic Lalique lettuce 190 g', unit:true},
+  {id:'v84', name:"חסה סלנובה הידרופונית 160 גרם", emoji:'🥬', coeff:null, barcode:null, barcodeNum:'7296073323143', en:'Hydroponic Salanova lettuce 160 g', unit:true},
+  {id:'v85', name:"חסה עגולה 200 גרם", emoji:'🥬', coeff:null, barcode:null, barcodeNum:'7296073413233', en:'Round lettuce 200 g', unit:true},
+  {id:'v86', name:"לבבות חסה קיסר 400 גרם", emoji:'🥬', coeff:null, barcode:null, barcodeNum:'7296073377214', en:'Caesar lettuce hearts 400 g', unit:true},
+  {id:'v87', name:"כרפס", emoji:'🌿', coeff:null, barcode:null, barcodeNum:null, en:'Celery (karpas)', unit:true},
+  {id:'v88', name:"סלרי עלים", emoji:'🌿', coeff:null, barcode:null, barcodeNum:'7290015979122', en:'Leaf celery', unit:true},
+  {id:'v89', name:"שורש כורכום טרי", emoji:'🫚', coeff:null, barcode:null, barcodeNum:'7290017291390', en:'Fresh turmeric root', unit:true},
+  {id:'v90', name:"שורש ג'ינג'ר ארוז 250 גרם", emoji:'🫚', coeff:null, barcode:null, barcodeNum:'7290017291567', en:'Ginger root, packed 250 g', unit:true},
+  {id:'v91', name:"שיני שום קלוף 500 גרם", emoji:'🧄', coeff:null, barcode:null, barcodeNum:'7296073612193', en:'Peeled garlic cloves 500 g', unit:true},
+  {id:'v92', name:"ממרח אבוקדו גוואקמולה 150 גרם", emoji:'🥑', coeff:null, barcode:null, barcodeNum:'7453140789558', en:'Avocado spread (guacamole) 150 g', unit:true},
+  {id:'v93', name:"תירס מבושל בוואקום שישייה", emoji:'🌽', coeff:null, barcode:null, barcodeNum:'8906038740821', en:'Cooked corn, vacuum-packed, 6-pack', unit:true},
+  {id:'v94', name:"תירס צהוב סופר סוויט (יח')", emoji:'🌽', coeff:null, barcode:null, barcodeNum:'7290011110109', en:'Yellow super-sweet corn, each', unit:true},
+  {id:'v95', name:"תפוח אדמה למיקרוגל", emoji:'🥔', coeff:null, barcode:null, barcodeNum:'7290017864341', en:'Microwave potato', unit:true},
+  {id:'v96', name:"חטיפוני גזר 350 גרם", emoji:'🥕', coeff:null, barcode:null, barcodeNum:'7290016584011', en:'Carrot snacks 350 g', unit:true},
+  {id:'v97', name:"צנונית ארוזה 500 גרם", emoji:'🥬', coeff:null, barcode:null, barcodeNum:'7290005610509', en:'Radish, packed 500 g', unit:true},
+  {id:'v98', name:"מלפפון בייבי מגש 350 גרם", emoji:'🥒', coeff:null, barcode:null, barcodeNum:'7296073417422', en:'Baby cucumber, tray 350 g', unit:true},
 ];
 
 /* ── Data — פירות sorted א–ת ──────────────────────────── */
 const fruits = [
-  {id:'f0',  name:"אבוקדו בשל ארוז (יח')",         emoji:'🥑', coeff:null, barcode:'barcodes/avocado-ripe.gif', ean:'0611745285685'},
-  {id:'f1',  name:'אבוקדו בתפזורת',                emoji:'🥑', coeff:13.7, barcode:'barcodes/avocado.gif', ean:'7290000964980'},
-  {id:'f2',  name:"אבוקדו גרנות ארוז (יח')",       emoji:'🥑', coeff:null, barcode:'barcodes/avocado-granot.gif', ean:'0693493172745'},
-  {id:'f3',  name:'אבטיח',                           emoji:'🍉', coeff:null, barcode:null, barcodeNum:'7290000965031'},
-  {id:'f4',  name:"אגס אנג׳ו",                emoji:'🍐', coeff:null, barcode:null, barcodeNum:'7290000964911'},
-  {id:'f5',  name:"אוכמניות (יח')",                emoji:'🫐', coeff:null, barcode:null},
-  {id:'f6',  name:"אננס (יח')",                    emoji:'🍍', coeff:null, barcode:'barcodes/pineapple.gif', ean:'7290000966496'},
-  {id:'f7',  name:'אפרסמון',                         emoji:'🍊', coeff:12,   barcode:'barcodes/persimmon.gif', ean:'7290000966335'},
-  {id:'f8',  name:'אפרסק',                           emoji:'🍑', coeff:null, barcode:null, barcodeNum:'7290000964041'},
-  {id:'f9',  name:'אשכולית אדומה',                  emoji:'🍊', coeff:17,   barcode:'barcodes/grapefruit-red.gif', ean:'7290000964393'},
-  {id:'f10', name:'אשכולית לבנה',                   emoji:'🍊', coeff:17,   barcode:'barcodes/grapefruit-white.gif', ean:'7290000964379'},
-  {id:'f11', name:'בננות',                           emoji:'🍌', coeff:14.5, barcode:'barcodes/banana.gif', ean:'7290000964775'},
-  {id:'f12', name:'גוייאבה',                         emoji:'🍈', coeff:null, barcode:null},
-  {id:'f13', name:'לימון',                           emoji:'🍋', coeff:14,   barcode:'barcodes/lemon.gif', ean:'7290000964492'},
-  {id:'f14', name:'לימון ארוז ברשת',                emoji:'🍋', coeff:14.5, barcode:'barcodes/lemon-net.gif', ean:'7290000987293'},
-  {id:'f38', name:'מישמש',                           emoji:'🍑', coeff:null, barcode:null, barcodeNum:'7290000965116'},
-  {id:'f15', name:'מלון',                            emoji:'🍈', coeff:null, barcode:null, barcodeNum:'7290000965055'},
-  {id:'f16', name:'מנגו',                            emoji:'🥭', coeff:null, barcode:null, barcodeNum:'7290000966434'},
-  {id:'f17', name:'נקטרינה',                         emoji:'🍑', coeff:null, barcode:null, barcodeNum:'7290000963969'},
-  {id:'f36', name:'ענבים אדומים',                    emoji:'🍇', coeff:null, barcode:null, barcodeNum:'7290013128324'},
-  {id:'f37', name:'ענבים לבנים',                     emoji:'🍇', coeff:null, barcode:null, barcodeNum:'7290013128317'},
-  {id:'f19', name:'פומלה לבנה',                     emoji:'🍊', coeff:9,    barcode:'barcodes/pomelo-white.gif', ean:'7290000964362'},
-  {id:'f20', name:'פומלית',                          emoji:'🍊', coeff:15,   barcode:'barcodes/pomelit.gif', ean:'7290000964461'},
-  {id:'f21', name:'פסיפלורה',                        emoji:'🌸', coeff:20,   barcode:'barcodes/passionfruit.gif', ean:'0608614315529'},
-  {id:'f22', name:"קוקוס לשתיה (יח')",              emoji:'🥥', coeff:null, barcode:'barcodes/coconut-drink.gif', ean:'8719325243659'},
-  {id:'f23', name:'קיווי',                           emoji:'🥝', coeff:12,   barcode:null, barcodeNum:'7290000966656'},
-  {id:'f24', name:'קלמנטינה',                        emoji:'🍊', coeff:14,   barcode:null, barcodeNum:'7290000964560'},
-  {id:'f25', name:'שזיף',                            emoji:'🍑', coeff:null, barcode:null},
-  {id:'f26', name:"שסק ארוז (יח')",                 emoji:'🍑', coeff:null, barcode:null, barcodeNum:'7290000966427'},
-  {id:'f27', name:"תותים (יח')",                    emoji:'🍓', coeff:null, barcode:null, barcodeNum:'7290000966779'},
-  {id:'f28', name:'תפוז ברשת למיץ',                 emoji:'🍊', coeff:12,   barcode:'barcodes/orange-net.gif', ean:'7290000964348'},
-  {id:'f29', name:'תפוזים',                          emoji:'🍊', coeff:14,   barcode:'barcodes/orange.gif', ean:'7290000986517'},
-  {id:'f30', name:'תפוח את גאלה',                   emoji:'🍎', coeff:11,   barcode:'barcodes/apple-gala.gif', ean:'7290000963426'},
-  {id:'f31', name:'תפוח עץ מוזהב',                  emoji:'🍎', coeff:12,   barcode:'barcodes/apple-golden.gif', ean:'7290000963082'},
-  {id:'f32', name:'תפוח עץ סטרקינג',                emoji:'🍎', coeff:12,   barcode:'barcodes/apple-starking.gif', ean:'7290000963297'},
-  {id:'f33', name:'תפוח עץ סמיט',                   emoji:'🍎', coeff:12.5, barcode:'barcodes/apple-smith.gif', ean:'7290000963518'},
-  {id:'f34', name:'תפוח עץ פינקריספי',              emoji:'🍎', coeff:18,   barcode:'barcodes/apple-pink-crispy.gif', ean:'7290000963150'},
-  {id:'f35', name:'תפוח עץ קנזי',                   emoji:'🍎', coeff:8,    barcode:null, barcodeNum:'7290000998831'},
-  {id:'f39', name:'אגס קוסטיה',                     emoji:'🍐', coeff:null, barcode:null},
-  {id:'f40', name:"ליצ'י",                          emoji:'🍈', coeff:null, barcode:null},
-  {id:'f41', name:'מלון ספרדי',                     emoji:'🍈', coeff:null, barcode:null, barcodeNum:'7290000965062'},
-  {id:'f42', name:'מלון ספרדי קטן',                 emoji:'🍈', coeff:null, barcode:null},
-  {id:'f43', name:'מלון צהוב בוהק',                 emoji:'🍈', coeff:null, barcode:null, barcodeNum:'7290000965086'},
-  {id:'f44', name:'סברס',                            emoji:'🌵', coeff:null, barcode:null, barcodeNum:'7290000966526'},
-  {id:'f45', name:'ענבים אדמדמים',                   emoji:'🍇', coeff:null, barcode:null},
-  {id:'f46', name:'רימון',                           emoji:'🍎', coeff:null, barcode:null, barcodeNum:'7290000966564'},
-  {id:'f47', name:'שזיף אדום',                       emoji:'🍑', coeff:null, barcode:null, barcodeNum:'7290000965345'},
-  {id:'f48', name:'שזיף בטעם צמר גפן',               emoji:'🍑', coeff:null, barcode:null},
-  {id:'f49', name:'שזיף צהוב',                       emoji:'🍑', coeff:null, barcode:null, barcodeNum:'7290000965284'},
-  {id:'f50', name:'תאנים טריות',                     emoji:'🍈', coeff:null, barcode:null, barcodeNum:'7290000966540'},
-  {id:'f51', name:'תפוח עץ סנדוונר',                 emoji:'🍎', coeff:null, barcode:null},
-  {id:'f52', name:'מלון שרנתייה',                    emoji:'🍈', coeff:null, barcode:null, barcodeNum:'7290000965611'},
-  {id:'f53', name:"ענבים בטעם צמר גפן מתוק",         emoji:'🍇', coeff:null, barcode:null, barcodeNum:'7290017593579'},
-  {id:'f54', name:'חבוש',                            emoji:'🍐', coeff:null, barcode:null, barcodeNum:'7290000966595'},
-  {id:'f55', name:'פיטאיה',                          emoji:'🐉', coeff:null, barcode:null, barcodeNum:'7290000965154'},
-  {id:'f56', name:'שזיף שגיב',                       emoji:'🍑', coeff:null, barcode:null},
-  {id:'f57', name:'תמר בהרי אריזה',                  emoji:'🌴', coeff:null, barcode:null},
-  {id:'f58', name:'תמר בהרי בתפזורת',                emoji:'🌴', coeff:null, barcode:null},
-  {id:'f59', name:"אגס ספדונה", emoji:'🍐', coeff:16, barcode:null, barcodeNum:'7290000964829'},
-  {id:'f60', name:"ענבים שחורים מידנייט", emoji:'🍇', coeff:10, barcode:null, barcodeNum:'7290005678486'},
-  {id:'f61', name:"ענבים רד-טלי", emoji:'🍇', coeff:9, barcode:null, barcodeNum:'7290005678110'},
-  {id:'f62', name:"שזיף מטלי", emoji:'🍑', coeff:10, barcode:null, barcodeNum:'7290000965178'},
-  {id:'f63', name:"אפרסמון ארוז (יח')", emoji:'🍊', coeff:null, barcode:null, barcodeNum:'7290010582228'},
-  {id:'f64', name:"דובדבן אדום ארוז (יח')", emoji:'🍒', coeff:null, barcode:null, barcodeNum:'7290000966694'},
-  {id:'f65', name:"פטל שחור ארוז (יח')", emoji:'🫐', coeff:null, barcode:null, barcodeNum:'0710497311090'},
-  {id:'f66', name:"קיווי ארוז (יח')", emoji:'🥝', coeff:null, barcode:null, barcodeNum:'7290008268455'},
-  {id:'f67', name:"קיווי צהוב ארוז (יח')", emoji:'🥝', coeff:null, barcode:null, barcodeNum:'7290017291505'},
-  {id:'f68', name:"קוקוס ראש (יח')", emoji:'🥥', coeff:null, barcode:null, barcodeNum:'7290000988092'},
-  {id:'f69', name:"אבוקדו האס בשל ארוז (יח')", emoji:'🥑', coeff:null, barcode:null, barcodeNum:'7290014462342'},
+  {id:'f0',  name:"אבוקדו בשל ארוז (יח')",         emoji:'🥑', coeff:null, barcode:'barcodes/avocado-ripe.gif', ean:'0611745285685', en:'Ripe avocado, packed', unit:true},
+  {id:'f1',  name:'אבוקדו בתפזורת',                emoji:'🥑', coeff:13.7, barcode:'barcodes/avocado.gif', ean:'7290000964980', en:'Avocado, loose'},
+  {id:'f2',  name:"אבוקדו גרנות ארוז (יח')",       emoji:'🥑', coeff:null, barcode:'barcodes/avocado-granot.gif', ean:'0693493172745', en:'Granot avocado, packed', unit:true},
+  {id:'f3',  name:'אבטיח',                           emoji:'🍉', coeff:null, barcode:null, barcodeNum:'7290000965031', en:'Watermelon'},
+  {id:'f4',  name:"אגס אנג׳ו",                emoji:'🍐', coeff:null, barcode:null, barcodeNum:'7290000964911', en:'Anjou pear'},
+  {id:'f5',  name:"אוכמניות (יח')",                emoji:'🫐', coeff:null, barcode:null, barcodeNum:'7754856000006', en:'Blueberries', unit:true},
+  {id:'f6',  name:"אננס (יח')",                    emoji:'🍍', coeff:null, barcode:'barcodes/pineapple.gif', ean:'7290000966496', en:'Pineapple', unit:true},
+  {id:'f7',  name:'אפרסמון',                         emoji:'🍊', coeff:12,   barcode:'barcodes/persimmon.gif', ean:'7290000966335', en:'Persimmon'},
+  {id:'f8',  name:'אפרסק',                           emoji:'🍑', coeff:null, barcode:null, barcodeNum:'7290000964041', en:'Peach'},
+  {id:'f9',  name:'אשכולית אדומה',                  emoji:'🍊', coeff:17,   barcode:'barcodes/grapefruit-red.gif', ean:'7290000964393', en:'Red grapefruit'},
+  {id:'f10', name:'אשכולית לבנה',                   emoji:'🍊', coeff:17,   barcode:'barcodes/grapefruit-white.gif', ean:'7290000964379', en:'White grapefruit'},
+  {id:'f11', name:'בננות',                           emoji:'🍌', coeff:14.5, barcode:'barcodes/banana.gif', ean:'7290000964775', en:'Bananas'},
+  {id:'f12', name:'גוייאבה',                         emoji:'🍈', coeff:null, barcode:null, en:'Guava'},
+  {id:'f13', name:'לימון',                           emoji:'🍋', coeff:14,   barcode:'barcodes/lemon.gif', ean:'7290000964492', en:'Lemon'},
+  {id:'f14', name:'לימון ארוז ברשת',                emoji:'🍋', coeff:14.5, barcode:'barcodes/lemon-net.gif', ean:'7290000987293', en:'Lemons in a net bag'},
+  {id:'f38', name:'מישמש',                           emoji:'🍑', coeff:null, barcode:null, barcodeNum:'7290000965116', en:'Apricot'},
+  {id:'f15', name:'מלון',                            emoji:'🍈', coeff:null, barcode:null, barcodeNum:'7290000965055', en:'Melon'},
+  {id:'f16', name:'מנגו',                            emoji:'🥭', coeff:null, barcode:null, barcodeNum:'7290000966434', en:'Mango'},
+  {id:'f17', name:'נקטרינה',                         emoji:'🍑', coeff:null, barcode:null, barcodeNum:'7290000963969', en:'Nectarine'},
+  {id:'f36', name:'ענבים אדומים',                    emoji:'🍇', coeff:null, barcode:null, barcodeNum:'7290013128324', en:'Red grapes'},
+  {id:'f37', name:'ענבים לבנים',                     emoji:'🍇', coeff:null, barcode:null, barcodeNum:'7290013128317', en:'White grapes'},
+  {id:'f19', name:'פומלה לבנה',                     emoji:'🍊', coeff:9,    barcode:'barcodes/pomelo-white.gif', ean:'7290000964362', en:'White pomelo'},
+  {id:'f20', name:'פומלית',                          emoji:'🍊', coeff:15,   barcode:'barcodes/pomelit.gif', ean:'7290000964461', en:'Pomelit (sweetie)'},
+  {id:'f21', name:'פסיפלורה',                        emoji:'🌸', coeff:20,   barcode:'barcodes/passionfruit.gif', ean:'0608614315529', en:'Passion fruit'},
+  {id:'f22', name:"קוקוס לשתיה (יח')",              emoji:'🥥', coeff:null, barcode:'barcodes/coconut-drink.gif', ean:'8719325243659', en:'Drinking coconut', unit:true},
+  {id:'f23', name:'קיווי',                           emoji:'🥝', coeff:12,   barcode:null, barcodeNum:'7290000966656', en:'Kiwi'},
+  {id:'f24', name:'קלמנטינה',                        emoji:'🍊', coeff:14,   barcode:null, barcodeNum:'7290000964560', en:'Clementine'},
+  {id:'f25', name:'שזיף',                            emoji:'🍑', coeff:null, barcode:null, en:'Plum'},
+  {id:'f26', name:"שסק ארוז (יח')",                 emoji:'🍑', coeff:null, barcode:null, barcodeNum:'7290000966427', en:'Loquat, packed', unit:true},
+  {id:'f27', name:"תותים (יח')",                    emoji:'🍓', coeff:null, barcode:null, barcodeNum:'7290000966779', en:'Strawberries', unit:true},
+  {id:'f28', name:'תפוז ברשת למיץ',                 emoji:'🍊', coeff:12,   barcode:'barcodes/orange-net.gif', ean:'7290000964348', en:'Juice oranges in a net bag'},
+  {id:'f29', name:'תפוזים',                          emoji:'🍊', coeff:14,   barcode:'barcodes/orange.gif', ean:'7290000986517', en:'Oranges'},
+  {id:'f30', name:'תפוח את גאלה',                   emoji:'🍎', coeff:11,   barcode:'barcodes/apple-gala.gif', ean:'7290000963426', en:'Gala apple'},
+  {id:'f31', name:'תפוח עץ מוזהב',                  emoji:'🍎', coeff:12,   barcode:'barcodes/apple-golden.gif', ean:'7290000963082', en:'Golden Delicious apple'},
+  {id:'f32', name:'תפוח עץ סטרקינג',                emoji:'🍎', coeff:12,   barcode:'barcodes/apple-starking.gif', ean:'7290000963297', en:'Starking apple'},
+  {id:'f33', name:'תפוח עץ סמיט',                   emoji:'🍎', coeff:12.5, barcode:'barcodes/apple-smith.gif', ean:'7290000963518', en:'Granny Smith apple'},
+  {id:'f34', name:'תפוח עץ פינקריספי',              emoji:'🍎', coeff:18,   barcode:'barcodes/apple-pink-crispy.gif', ean:'7290000963150', en:'Pink Lady apple'},
+  {id:'f35', name:'תפוח עץ קנזי',                   emoji:'🍎', coeff:8,    barcode:null, barcodeNum:'7290000998831', en:'Kanzi apple'},
+  {id:'f39', name:'אגס קוסטיה',                     emoji:'🍐', coeff:null, barcode:null, en:'Coscia pear'},
+  {id:'f40', name:"ליצ'י",                          emoji:'🍈', coeff:null, barcode:null, en:'Lychee'},
+  {id:'f41', name:'מלון ספרדי',                     emoji:'🍈', coeff:null, barcode:null, barcodeNum:'7290000965062', en:'Spanish melon'},
+  {id:'f42', name:'מלון ספרדי קטן',                 emoji:'🍈', coeff:null, barcode:null, en:'Small Spanish melon'},
+  {id:'f43', name:'מלון צהוב בוהק',                 emoji:'🍈', coeff:null, barcode:null, barcodeNum:'7290000965086', en:'Canary melon'},
+  {id:'f44', name:'סברס',                            emoji:'🌵', coeff:null, barcode:null, barcodeNum:'7290000966526', en:'Prickly pear'},
+  {id:'f45', name:'ענבים אדמדמים',                   emoji:'🍇', coeff:null, barcode:null, en:'Reddish grapes'},
+  {id:'f46', name:'רימון',                           emoji:'🍎', coeff:null, barcode:null, barcodeNum:'7290000966564', en:'Pomegranate'},
+  {id:'f47', name:'שזיף אדום',                       emoji:'🍑', coeff:null, barcode:null, barcodeNum:'7290000965345', en:'Red plum'},
+  {id:'f48', name:'שזיף בטעם צמר גפן',               emoji:'🍑', coeff:null, barcode:null, en:'Cotton candy plum'},
+  {id:'f49', name:'שזיף צהוב',                       emoji:'🍑', coeff:null, barcode:null, barcodeNum:'7290000965284', en:'Yellow plum'},
+  {id:'f50', name:'תאנים טריות',                     emoji:'🍈', coeff:null, barcode:null, barcodeNum:'7290000966540', en:'Fresh figs'},
+  {id:'f51', name:'תפוח עץ סנדוונר',                 emoji:'🍎', coeff:null, barcode:null, en:'Sundowner apple'},
+  {id:'f52', name:'מלון שרנתייה',                    emoji:'🍈', coeff:null, barcode:null, barcodeNum:'7290000965611', en:'Charentais melon'},
+  {id:'f53', name:"ענבים בטעם צמר גפן מתוק",         emoji:'🍇', coeff:null, barcode:null, barcodeNum:'7290017593579', en:'Cotton candy grapes', unit:true},
+  {id:'f54', name:'חבוש',                            emoji:'🍐', coeff:null, barcode:null, barcodeNum:'7290000966595', en:'Quince'},
+  {id:'f55', name:'פיטאיה',                          emoji:'🐉', coeff:null, barcode:null, barcodeNum:'7290000965154', en:'Dragon fruit (pitaya)'},
+  {id:'f56', name:'שזיף שגיב',                       emoji:'🍑', coeff:null, barcode:null, en:'Sagiv plum'},
+  {id:'f57', name:'תמר בהרי אריזה',                  emoji:'🌴', coeff:null, barcode:null, en:'Barhi dates, packed'},
+  {id:'f58', name:'תמר בהרי בתפזורת',                emoji:'🌴', coeff:null, barcode:null, en:'Barhi dates, loose'},
+  {id:'f59', name:"אגס ספדונה", emoji:'🍐', coeff:16, barcode:null, barcodeNum:'7290000964829', en:'Spadona pear'},
+  {id:'f60', name:"ענבים שחורים מידנייט", emoji:'🍇', coeff:10, barcode:null, barcodeNum:'7290005678486', en:'Midnight black grapes'},
+  {id:'f61', name:"ענבים רד-טלי", emoji:'🍇', coeff:9, barcode:null, barcodeNum:'7290005678110', en:'Red Tali grapes'},
+  {id:'f62', name:"שזיף מטלי", emoji:'🍑', coeff:10, barcode:null, barcodeNum:'7290000965178', en:'Metley plum'},
+  {id:'f63', name:"אפרסמון ארוז (יח')", emoji:'🍊', coeff:null, barcode:null, barcodeNum:'7290010582228', en:'Persimmon, packed', unit:true},
+  {id:'f64', name:"דובדבן אדום ארוז (יח')", emoji:'🍒', coeff:null, barcode:null, barcodeNum:'7290000966694', en:'Red cherries, packed', unit:true},
+  {id:'f65', name:"פטל שחור ארוז (יח')", emoji:'🫐', coeff:null, barcode:null, barcodeNum:'0710497311090', en:'Blackberries, packed', unit:true},
+  {id:'f66', name:"קיווי ארוז (יח')", emoji:'🥝', coeff:null, barcode:null, barcodeNum:'7290008268455', en:'Kiwi, packed', unit:true},
+  {id:'f67', name:"קיווי צהוב ארוז (יח')", emoji:'🥝', coeff:null, barcode:null, barcodeNum:'7290017291505', en:'Yellow kiwi, packed', unit:true},
+  {id:'f68', name:"קוקוס ראש (יח')", emoji:'🥥', coeff:null, barcode:null, barcodeNum:'7290000988092', en:'Whole coconut', unit:true},
+  {id:'f69', name:"אבוקדו האס בשל ארוז (יח')", emoji:'🥑', coeff:null, barcode:null, barcodeNum:'7290014462342', en:'Hass avocado, ripe, packed', unit:true},
+  {id:'f70', name:"אבוקדו בשל מוכן לאכילה 450 גרם", emoji:'🥑', coeff:null, barcode:null, barcodeNum:'7290018732601', en:'Ripe ready-to-eat avocado 450 g', unit:true},
+  {id:'f71', name:"קיווי ירוק זספרי 460 גרם", emoji:'🥝', coeff:null, barcode:null, barcodeNum:'7290000993621', en:'Zespri green kiwi 460 g', unit:true},
+  {id:'f72', name:"קיווי זהב זספרי 460 גרם", emoji:'🥝', coeff:null, barcode:null, barcodeNum:'7290000964652', en:'Zespri SunGold kiwi 460 g', unit:true},
+  {id:'f73', name:"ענבים שחורים טלי אדורה", emoji:'🍇', coeff:null, barcode:null, barcodeNum:'7290005678806', en:'Black grapes, Tali Adora'},
+  {id:'f74', name:"ענבים אדומים סקרלוטה", emoji:'🍇', coeff:null, barcode:null, barcodeNum:'7290005678585', en:'Red grapes, Scarlotta'},
+  {id:'f75', name:"ענבים ירוקים", emoji:'🍇', coeff:null, barcode:null, barcodeNum:null, en:'Green grapes'},
+  {id:'f76', name:"פומלה אדומה", emoji:'🍊', coeff:null, barcode:null, barcodeNum:null, en:'Red pomelo'},
 ];
 
 /* ── Row builder ──────────────────────────────────────── */
 function makeRow(item) {
   const div = document.createElement('div');
-  div.className = 'product-row';
+  div.className = 'product-row' + (item.unit ? ' unit' : '');
   div.id = 'row-' + item.id;
 
   const hasImg = !!item.barcode;
@@ -598,7 +681,7 @@ function makeRow(item) {
     <div class="product-top">
       <div class="product-name">
         <span class="product-emoji">${item.emoji}</span>
-        <span class="product-label">${item.name}</span>
+        <span class="product-label"><span class="he">${item.name}</span><span class="en">${item.en || ''}</span></span>
       </div>
       <div class="barcode-section">${bcPart}</div>
     </div>
@@ -644,6 +727,9 @@ function removeEntry(btn, id) {
 }
 
 /* ── Calculation ───────────────────────────────────────── */
+const itemById = id => vegetables.find(i => i.id === id) || fruits.find(i => i.id === id);
+const isUnit = id => !!itemById(id)?.unit;
+
 function calcRow(id) {
   const inputs = document.querySelectorAll(`.box-input[data-id="${id}"]`);
   let boxes = 0;
@@ -655,7 +741,7 @@ function calcRow(id) {
   const totEl = document.getElementById('tot-' + id);
   if (totEl) {
     if (boxes === 0)       totEl.textContent = '—';
-    else if (coeff === 0)  totEl.textContent = boxes + '×?';
+    else if (coeff === 0)  totEl.textContent = isUnit(id) ? boxes + " יח'" : boxes + '×?';
     else                   totEl.textContent = kg % 1 === 0 ? kg : kg.toFixed(1);
   }
 
@@ -734,7 +820,7 @@ function getData() {
     inputs.forEach(inp => { const v = parseFloat(inp.value) || 0; if (v > 0) parts.push(v); boxes += v; });
     if (boxes > 0) {
       const coeff = parseFloat(document.getElementById('coeff-' + item.id)?.value) || 0;
-      rows.push({ cat, name: item.name, boxes, parts, coeff, kg: boxes * coeff });
+      rows.push({ cat, name: item.name, boxes, parts, coeff, kg: boxes * coeff, unit: !!item.unit });
     }
   };
   vegetables.forEach(item => proc(item, 'ירקות'));
@@ -755,7 +841,9 @@ function buildReport(rows, dateStr) {
     if (r.boxes !== null) {
       const boxStr = r.parts.length > 1 ? r.parts.join('+') + '=' + r.boxes : '' + r.boxes;
       const kgStr = r.coeff ? ' × ' + r.coeff + ' = ' + (r.kg % 1 === 0 ? r.kg : r.kg.toFixed(1)) + ' ק"ג' : ' ארגז';
-      txt += '  • ' + r.name + ': ' + boxStr + ' ארגז' + kgStr + '\n';
+      txt += r.unit && !r.coeff
+        ? '  • ' + r.name + ': ' + boxStr + " יח'\n"
+        : '  • ' + r.name + ': ' + boxStr + ' ארגז' + kgStr + '\n';
     } else {
       txt += '  • ' + r.name + ': ' + r.kg + ' ק"ג\n';
     }
@@ -793,12 +881,13 @@ function onSearchInput(val) {
   const sugg = document.getElementById('searchSuggestions');
   const q = val.trim();
   if (!q) { sugg.style.display = 'none'; sugg.innerHTML = ''; return; }
-  const matches = allSearchItems.filter(i => i.name.includes(q));
+  const ql = q.toLowerCase();
+  const matches = allSearchItems.filter(i => i.name.includes(q) || (i.en || '').toLowerCase().includes(ql));
   if (!matches.length) { sugg.style.display = 'none'; sugg.innerHTML = ''; return; }
   sugg.innerHTML = matches.slice(0, 12).map(i =>
     `<div class="search-sugg-item" onclick="jumpToItem('${i.id}')">
       <span>${i.emoji}</span>
-      <span>${i.name}</span>
+      <span>${i.name}${i.en ? `<br><small style="color:#888">${i.en}</small>` : ''}</span>
       <span class="search-sugg-cat">${i.cat}</span>
     </div>`
   ).join('');
@@ -806,7 +895,7 @@ function onSearchInput(val) {
 }
 
 function jumpToItem(id) {
-  toggleSearch();
+  if (document.getElementById('searchBar').classList.contains('open')) toggleSearch();
   const row = document.getElementById('row-' + id);
   if (!row) return;
   setTimeout(() => {
@@ -861,125 +950,123 @@ if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 
 
-/* ── Alphabet wheel (3D drum) ──────────────────────────────────────── */
-const ABC = 'אבגדהוזחטיכלמנסעפצקרשת'.split('');
-const ABC_STEP = 360 / ABC.length;
+/* ── Alphabet wheel ─────────────────────────────────────────────────
+   Native scroll + scroll-snap (smooth momentum on iOS, nothing heavy per frame).
+   Page behind is locked while the wheel is open, so a finger can never scroll it. */
+const ABC_SETS = { he: 'אבגדהוזחטיכלמנסעפצקרשת'.split(''), en: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') };
 const ABC_FACE_H = 76;
-const ABC_R = (ABC_FACE_H / 2) / Math.tan(Math.PI / ABC.length);
-let abcCat = 'v', abcRot = 0, abcAnim = null;
+let abcCat = 'v', abcLang = 'he', abcScrollY = 0, abcRaf = 0;
 
 function abcItems(cat) {
   return (cat === 'v' ? vegetables : fruits).slice().sort(byNameHe);
 }
-
-function buildAbc() {
-  const drum = document.getElementById('abcDrum');
+function abcHits(letter) {
   const items = abcItems(abcCat);
-  drum.innerHTML = ABC.map((l, i) => {
-    const n = items.filter(it => it.name.startsWith(l)).length;
-    return `<div class="abc-face${n ? '' : ' empty'}" data-i="${i}"
-      style="transform:rotateX(${-i * ABC_STEP}deg) translateZ(${ABC_R}px)">
-      <span>${l}</span><span class="cnt">${n}</span></div>`;
-  }).join('');
-  renderAbc();
+  if (abcLang === 'he') return items.filter(it => it.name.startsWith(letter));
+  return items.filter(it => (it.en || '').toUpperCase().startsWith(letter))
+              .sort((a, b) => (a.en || '').localeCompare(b.en || '', 'en'));
 }
 
-function renderAbc() {
-  document.getElementById('abcDrum').style.transform =
-    `translateZ(${-ABC_R}px) rotateX(${abcRot}deg)`;
-  document.querySelectorAll('.abc-face').forEach((f, i) => {
-    let d = ((abcRot - i * ABC_STEP) % 360 + 540) % 360 - 180;   // −180..180
-    f.style.filter = `brightness(${Math.max(.35, Math.cos(d * Math.PI / 180)).toFixed(2)})`;
+function buildAbc() {
+  const list = document.getElementById('abcList');
+  const letters = ABC_SETS[abcLang];
+  const pad = Math.max(0, (list.clientHeight - ABC_FACE_H) / 2);
+  list.innerHTML = `<div style="height:${pad}px"></div>` + letters.map((l, i) => {
+    const n = abcHits(l).length;
+    return `<div class="abc-face${n ? '' : ' empty'}" data-i="${i}" onclick="pickAbc(${i})">
+      <span>${l}</span><span class="cnt">${n}</span></div>`;
+  }).join('') + `<div style="height:${pad}px"></div>`;
+  list.scrollTop = 0;
+  shapeAbc();
+}
+
+function shapeAbc() {            // cylinder look: tilt + fade faces away from the centre
+  abcRaf = 0;
+  const list = document.getElementById('abcList');
+  const mid = list.scrollTop + list.clientHeight / 2;
+  list.querySelectorAll('.abc-face').forEach(f => {
+    const d = (f.offsetTop + ABC_FACE_H / 2 - mid) / (list.clientHeight / 2);   // −1..1
+    const k = Math.max(-1, Math.min(1, d));
+    f.style.transform = `perspective(500px) rotateX(${(-k * 38).toFixed(1)}deg) scale(${(1 - Math.abs(k) * .12).toFixed(3)})`;
+    f.style.opacity = (1 - Math.abs(k) * .55).toFixed(2);
   });
 }
 
-function abcIndex() { return ((Math.round(abcRot / ABC_STEP) % ABC.length) + ABC.length) % ABC.length; }
-
-function animateAbcTo(target, ms, done) {
-  cancelAnimationFrame(abcAnim);
-  const from = abcRot, t0 = performance.now();
-  const tick = t => {
-    const k = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - k, 3);
-    abcRot = from + (target - from) * e; renderAbc();
-    if (k < 1) abcAnim = requestAnimationFrame(tick); else done && done();
-  };
-  abcAnim = requestAnimationFrame(tick);
+function pickAbc(i) {
+  const list = document.getElementById('abcList');
+  const face = list.querySelector(`.abc-face[data-i="${i}"]`);
+  const target = face.offsetTop + ABC_FACE_H / 2 - list.clientHeight / 2;
+  if (Math.abs(list.scrollTop - target) > 4) list.scrollTo({ top: target, behavior: 'smooth' });
+  setTimeout(() => chooseLetter(ABC_SETS[abcLang][i]), 180);
 }
 
-function snapAbc() { animateAbcTo(Math.round(abcRot / ABC_STEP) * ABC_STEP, 220); }
-
-function setAbcCat(c) {
-  abcCat = c;
-  document.getElementById('abcCatV').classList.toggle('on', c === 'v');
-  document.getElementById('abcCatF').classList.toggle('on', c === 'f');
-  buildAbc();
+function chooseLetter(letter) {
+  const hits = abcHits(letter);
+  if (!hits.length) { showToast((abcLang === 'he' ? 'אין מוצרים באות ' : 'No items for ') + letter); return; }
+  if (abcLang === 'he') { closeAbc(); highlightRows(hits); return; }
+  // English initials are scattered in the Hebrew-sorted list → show the matches to pick from
+  const res = document.getElementById('abcResults');
+  res.innerHTML = `<div class="res-head"><span>${letter}</span><button onclick="showAbcWheel()">→ חזרה</button></div>` +
+    hits.map(it => `<div class="res-item" onclick="closeAbc();highlightRows([itemById('${it.id}')])">
+      <span class="em">${it.emoji}</span>
+      <span class="nm"><b>${it.en}</b><span>${it.name}</span></span></div>`).join('');
+  document.getElementById('abcStage').style.display = 'none';
+  document.getElementById('abcHint').style.display = 'none';
+  res.classList.add('open'); res.scrollTop = 0;
 }
 
-function openAbc() {
-  if (document.getElementById('searchBar').classList.contains('open')) toggleSearch();
-  document.getElementById('abcOverlay').classList.add('open');
-  buildAbc();
+function showAbcWheel() {
+  document.getElementById('abcResults').classList.remove('open');
+  document.getElementById('abcStage').style.display = '';
+  document.getElementById('abcHint').style.display = '';
 }
-function closeAbc() { document.getElementById('abcOverlay').classList.remove('open'); }
 
-function jumpToLetter(i) {
-  const letter = ABC[i];
-  const hits = abcItems(abcCat).filter(it => it.name.startsWith(letter));
-  if (!hits.length) { showToast('אין מוצרים באות ' + letter); return; }
-  closeAbc();
-  const first = document.getElementById('row-' + hits[0].id);
+function highlightRows(items) {
+  const first = document.getElementById('row-' + items[0].id);
   const headerH = document.querySelector('.header').offsetHeight;
   window.scrollTo({ top: first.getBoundingClientRect().top + window.scrollY - headerH - 10, behavior: 'smooth' });
-  hits.forEach(it => {
+  items.forEach(it => {
     const row = document.getElementById('row-' + it.id);
     row.classList.remove('row-highlight'); void row.offsetWidth; row.classList.add('row-highlight');
     setTimeout(() => row.classList.remove('row-highlight'), 1900);
   });
 }
 
-(function initAbcGestures() {
-  const stage = document.getElementById('abcStage');
-  const DEG_PER_PX = 180 / Math.PI / ABC_R;
-  let startY = 0, lastY = 0, lastT = 0, vel = 0, moved = 0, down = false;
+function setAbcCat(c) {
+  abcCat = c;
+  document.getElementById('abcCatV').classList.toggle('on', c === 'v');
+  document.getElementById('abcCatF').classList.toggle('on', c === 'f');
+  showAbcWheel(); buildAbc();
+}
+function setAbcLang(l) {
+  abcLang = l;
+  document.getElementById('abcLangHe').classList.toggle('on', l === 'he');
+  document.getElementById('abcLangEn').classList.toggle('on', l === 'en');
+  document.getElementById('abcHint').textContent = l === 'he' ? 'גלגל למעלה / למטה ולחץ על אות' : 'Scroll and tap a letter';
+  showAbcWheel(); buildAbc();
+}
 
-  stage.addEventListener('pointerdown', e => {
-    cancelAnimationFrame(abcAnim);
-    down = true; moved = 0; vel = 0;
-    startY = lastY = e.clientY; lastT = performance.now();
-    stage.setPointerCapture(e.pointerId);
-  });
-  stage.addEventListener('pointermove', e => {
-    if (!down) return;
-    const now = performance.now(), dy = e.clientY - lastY;
-    abcRot -= dy * DEG_PER_PX;
-    vel = -dy * DEG_PER_PX / Math.max(1, now - lastT);
-    moved = Math.max(moved, Math.abs(e.clientY - startY));
-    lastY = e.clientY; lastT = now; renderAbc();
-  });
-  stage.addEventListener('pointerup', e => {
-    if (!down) return; down = false;
-    if (moved < 8) {                               // tap → choose letter
-      const el = document.elementsFromPoint(e.clientX, e.clientY).find(x => x.classList?.contains('abc-face'));
-      const i = el ? +el.dataset.i : abcIndex();
-      let target = abcRot + ((((i * ABC_STEP - abcRot) % 360) + 540) % 360 - 180);
-      animateAbcTo(target, 200, () => jumpToLetter(i));
-      return;
-    }
-    if (performance.now() - lastT > 80) vel = 0;  // finger stopped before release
-    const coast = () => {                          // inertia, then snap
-      vel *= 0.95; abcRot += vel * 16; renderAbc();
-      if (Math.abs(vel) > 0.01) abcAnim = requestAnimationFrame(coast); else snapAbc();
-    };
-    abcAnim = requestAnimationFrame(coast);
-  });
-  stage.addEventListener('pointercancel', () => { down = false; snapAbc(); });
+function openAbc() {
+  if (document.getElementById('searchBar').classList.contains('open')) toggleSearch();
+  abcScrollY = window.scrollY;                      // lock the page behind
+  Object.assign(document.body.style, { position: 'fixed', top: -abcScrollY + 'px', left: '0', right: '0' });
+  document.getElementById('abcOverlay').classList.add('open');
+  showAbcWheel(); buildAbc();
+}
+function closeAbc() {
+  document.getElementById('abcOverlay').classList.remove('open');
+  Object.assign(document.body.style, { position: '', top: '', left: '', right: '' });
+  window.scrollTo(0, abcScrollY);
+}
 
-  let wheelT;
-  stage.addEventListener('wheel', e => {
-    e.preventDefault(); cancelAnimationFrame(abcAnim);
-    abcRot += e.deltaY * 0.12; renderAbc();
-    clearTimeout(wheelT); wheelT = setTimeout(snapAbc, 120);
+(function initAbc() {
+  const list = document.getElementById('abcList');
+  list.addEventListener('scroll', () => { if (!abcRaf) abcRaf = requestAnimationFrame(shapeAbc); }, { passive: true });
+  // finger outside the wheel / result list must not move anything
+  document.getElementById('abcOverlay').addEventListener('touchmove', e => {
+    if (!e.target.closest('.abc-list, .abc-results')) e.preventDefault();
   }, { passive: false });
+  window.addEventListener('resize', () => { if (document.getElementById('abcOverlay').classList.contains('open')) buildAbc(); });
 })();
 
 /* ── Finish count → Excel → auto e-mail ────────────────────────────── */
@@ -1006,7 +1093,7 @@ function collectSections() {
       .forEach(inp => { const v = parseFloat(inp.value) || 0; if (v > 0) parts.push(v); });
     const boxes = parts.reduce((a, b) => a + b, 0);
     const coeff = parseFloat(document.getElementById('coeff-' + item.id)?.value) || 0;
-    return { name: item.name, code: item.barcodeNum || item.ean || null, parts, boxes, coeff, kg: boxes * coeff };
+    return { name: item.name, code: item.barcodeNum || item.ean || null, parts, boxes, coeff, kg: boxes * coeff, unit: !!item.unit };
   });
   const extras = [];
   for (let i = 0; i < 5; i++) {
