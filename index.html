@@ -370,6 +370,22 @@ body {
 .btn-action.finish:active { background:#BF360C; }
 .send-status { font-size:13px; color:#555; text-align:center; margin:-4px 0 12px; line-height:1.5; }
 .send-status.warn { color:#C62828; font-weight:600; }
+
+/* ── Shared count (several phones) ─────────────────────── */
+.sync-pill {
+  font-size:12px; font-weight:600; color:#1B5E20; background:#E8F5E9; border:1px solid #A5D6A7;
+  border-radius:14px; padding:4px 10px; cursor:pointer; max-width:52vw;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.sync-pill.wait { color:#8D6E00; background:#FFF8E1; border-color:#FFE082; }
+.sync-pill.off  { color:#666; background:#F2F2F2; border-color:#DDD; }
+.sync-pill.err  { color:#C62828; background:#FFEBEE; border-color:#EF9A9A; }
+.others { display:none; flex-wrap:wrap; gap:4px; margin-top:5px; justify-content:flex-start; }
+.others.on { display:flex; }
+.others span {
+  font-size:12.5px; font-weight:700; color:#0D47A1; background:#E3F2FD;
+  border:1px solid #90CAF9; border-radius:10px; padding:2px 8px; direction:rtl;
+}
 </style>
 </head>
 <body>
@@ -397,6 +413,7 @@ body {
 
 <div class="total-bar">
   <span class="label">פריטים שנספרו:</span>
+  <span class="sync-pill off" id="syncPill" onclick="changeName()">⚪ מתחבר…</span>
   <span class="count" id="total-count">0</span>
 </div>
 <div class="unit-legend"><b>★</b> רקע כהה = נמכר ביחידות / באריזה (לא לפי משקל)</div>
@@ -698,7 +715,8 @@ function makeRow(item) {
         value="${cv}" placeholder="—" step="0.1" inputmode="decimal"
         oninput="calcRow('${item.id}')">
       <div class="total-val-box" id="tot-${item.id}">—</div>
-    </div>`;
+    </div>
+    <div class="others" id="others-${item.id}"></div>`;
   return div;
 }
 
@@ -723,6 +741,7 @@ function addEntry(id) {
 function removeEntry(btn, id) {
   btn.closest('.entry-row').remove();
   calcRow(id);
+  queueItem(id);
   saveDraft();
 }
 
@@ -731,9 +750,7 @@ const itemById = id => vegetables.find(i => i.id === id) || fruits.find(i => i.i
 const isUnit = id => !!itemById(id)?.unit;
 
 function calcRow(id) {
-  const inputs = document.querySelectorAll(`.box-input[data-id="${id}"]`);
-  let boxes = 0;
-  inputs.forEach(inp => { boxes += parseFloat(inp.value) || 0; });
+  const boxes = allParts(id).reduce((a, b) => a + b, 0);
 
   const coeff = parseFloat(document.getElementById('coeff-' + id)?.value) || 0;
   const kg = boxes * coeff;
@@ -771,10 +788,7 @@ function buildExtras() {
 function updateTotal() {
   let n = 0;
   [...vegetables, ...fruits].forEach(item => {
-    let boxes = 0;
-    document.querySelectorAll(`.box-input[data-id="${item.id}"]`)
-      .forEach(inp => { boxes += parseFloat(inp.value) || 0; });
-    if (boxes > 0) n++;
+    if (allParts(item.id).some(v => v > 0)) n++;
   });
   for (let i = 0; i < 5; i++) {
     if (parseFloat(document.getElementById('extra-qty-' + i)?.value) || 0) n++;
@@ -784,7 +798,7 @@ function updateTotal() {
 
 /* ── Clear ─────────────────────────────────────────────── */
 function clearAll() {
-  if (!confirm('למחוק את כל הנתונים?')) return;
+  if (!confirm('למחוק את כל הספירה?\n(יימחק גם אצל כל מי שסופר איתך)')) return;
   [...vegetables, ...fruits].forEach(item => {
     const area = document.getElementById('entries-' + item.id);
     if (area) {
@@ -808,16 +822,15 @@ function clearAll() {
   }
   updateTotal();
   clearDraft();
+  resetShared('cleared');
 }
 
 /* ── Data collector ────────────────────────────────────── */
 function getData() {
   const rows = [];
   const proc = (item, cat) => {
-    const inputs = document.querySelectorAll(`.box-input[data-id="${item.id}"]`);
-    const parts = [];
-    let boxes = 0;
-    inputs.forEach(inp => { const v = parseFloat(inp.value) || 0; if (v > 0) parts.push(v); boxes += v; });
+    const parts = allParts(item.id).filter(v => v > 0);
+    const boxes = parts.reduce((a, b) => a + b, 0);
     if (boxes > 0) {
       const coeff = parseFloat(document.getElementById('coeff-' + item.id)?.value) || 0;
       rows.push({ cat, name: item.name, boxes, parts, coeff, kg: boxes * coeff, unit: !!item.unit });
@@ -1088,9 +1101,7 @@ async function loadExcelJS() {
 
 function collectSections() {
   const rowsOf = items => items.slice().sort(byNameHe).map(item => {
-    const parts = [];
-    document.querySelectorAll(`.box-input[data-id="${item.id}"]`)
-      .forEach(inp => { const v = parseFloat(inp.value) || 0; if (v > 0) parts.push(v); });
+    const parts = allParts(item.id).filter(v => v > 0);
     const boxes = parts.reduce((a, b) => a + b, 0);
     const coeff = parseFloat(document.getElementById('coeff-' + item.id)?.value) || 0;
     return { name: item.name, code: item.barcodeNum || item.ean || null, parts, boxes, coeff, kg: boxes * coeff, unit: !!item.unit };
@@ -1128,7 +1139,10 @@ async function postReport(payload) {
 async function finishCount() {
   const rows = getData();
   if (!rows.length) { showToast('לא הוזנו נתונים'); return; }
-  if (!confirm('לסיים את הספירה ולשלוח קובץ Excel לכל הנמענים?')) return;
+  const others = activeOthers();
+  if (!confirm('לסיים את הספירה ולשלוח קובץ Excel לכל הנמענים?' +
+    (others.length ? `\n\nסופרים איתך: ${others.join(', ')}\nודא/י שסיימו להזין לפני השליחה.` : ''))) return;
+  flushPending();
 
   showToast('מכין קובץ Excel...');
   try { await loadExcelJS(); } catch (e) { showToast('שגיאה: ' + e); return; }
@@ -1161,10 +1175,12 @@ async function finishCount() {
     await postReport(payload);
     try { localStorage.removeItem(QUEUE_KEY); } catch (e) {}
     clearDraft();
+    resetShared('finished');
     setSendStatus(`✅ נשלח בהצלחה ב-${time}`);
     showToast('✅ הדו"ח נשלח במייל!');
   } catch (e) {
     try { localStorage.setItem(QUEUE_KEY, JSON.stringify(payload)); clearDraft(); } catch (e2) {}
+    resetShared('finished');
     setSendStatus('⚠️ אין חיבור — הדו"ח יישלח אוטומטית כשהאינטרנט יחזור', true);
     showToast('⚠️ השליחה נכשלה — יישלח שוב אוטומטית');
   }
@@ -1183,6 +1199,201 @@ async function retryPendingReport() {
 }
 window.addEventListener('online', retryPendingReport);
 retryPendingReport();
+
+/* ── Shared count: several phones fill the same count live (Firestore) ──
+   One doc per branch. Every phone writes only its own box entries (items.<id>.<device>),
+   so two people never overwrite each other; totals = sum of everyone's entries.
+   Coefficients and extra rows are shared fields (last edit wins).                     */
+const FB_CONFIG = {
+  apiKey: 'AIzaSyCRBmBDYpcERv_tbwd0E7GEskm-_xHYBhk',
+  authDomain: 'expiry-tracker-ebf92.firebaseapp.com',
+  projectId: 'expiry-tracker-ebf92',
+  storageBucket: 'expiry-tracker-ebf92.firebasestorage.app',
+  messagingSenderId: '617575327249',
+  appId: '1:617575327249:web:75f84278678ad237bef3b0',
+};
+const FB_URL = 'https://www.gstatic.com/firebasejs/10.14.1/';
+const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+
+let myDev = lsGet('vegcount-device');
+if (!myDev) { myDev = 'd' + Math.random().toString(36).slice(2, 10); lsSet('vegcount-device', myDev); }
+let myName = lsGet('vegcount-name') || '';
+let fb = null, fbLoading = false, firstSnap = true, hadData = false, fromCache = true;
+let needUpload = false;                 // local count not yet in the shared doc
+let remote = { items: {}, coeff: {}, extras: {}, people: {} };
+const pend = new Map();                 // debounced writes: key → { t, fn }
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const ownVals = id => [...document.querySelectorAll(`.box-input[data-id="${id}"]`)].map(i => i.value);
+const othersOf = id => Object.entries(remote.items?.[id] || {}).filter(([dev]) => dev !== myDev).map(([, v]) => v);
+const othersParts = id => othersOf(id).flatMap(o => (o.e || []).map(v => parseFloat(v) || 0));
+function allParts(id) { return ownVals(id).map(v => parseFloat(v) || 0).concat(othersParts(id)); }
+const defCoeff = item => item.coeff !== null ? String(item.coeff) : '';
+
+function askName() {
+  const n = (prompt('איך קוראים לך?\n(השם יוצג למי שסופר איתך)', myName) || '').trim();
+  if (n) { myName = n.slice(0, 20); lsSet('vegcount-name', myName); }
+  if (!myName) myName = 'טלפון ' + myDev.slice(-3);
+}
+function changeName() {
+  askName();
+  if (fb) sharedWrite({});
+  renderSyncPill();
+}
+
+function activeOthers() {             // people who wrote to this count in the last 8 h
+  const recent = Date.now() - 8 * 3600e3;
+  return Object.entries(remote.people || {})
+    .filter(([dev, p]) => dev !== myDev && p && p.t > recent).map(([, p]) => p.n);
+}
+
+function renderSyncPill(state) {
+  const el = document.getElementById('syncPill');
+  el.className = 'sync-pill';
+  if (state === 'off' || (!fb && state !== 'err')) { el.classList.add('off'); el.textContent = '⚪ לא מחובר — נשמר בטלפון'; return; }
+  if (state === 'err') { el.classList.add('err'); el.textContent = '🔴 שגיאת סנכרון'; return; }
+  const names = activeOthers();
+  if (fromCache) el.classList.add('wait');
+  el.textContent = (fromCache ? '🟡 ' : '🟢 ') + (names.length ? 'סופרים יחד: ' + [myName, ...names].join(' · ') : 'ספירה משותפת · ' + myName);
+}
+
+function renderOthers(id) {
+  const el = document.getElementById('others-' + id);
+  if (!el) return;
+  const chips = othersOf(id).map(o => {
+    const parts = (o.e || []).map(v => parseFloat(v) || 0).filter(v => v > 0);
+    return parts.length ? `<span>👤 ${esc(o.n || '?')}: ${parts.join('+')}</span>` : '';
+  }).join('');
+  el.innerHTML = chips;
+  el.classList.toggle('on', !!chips);
+}
+
+function setOwnEntries(id, vals) {
+  vals = vals && vals.length ? vals : [''];
+  const cur = ownVals(id);
+  if (cur.length === vals.length && cur.every((v, i) => v === String(vals[i]))) return;
+  const area = document.getElementById('entries-' + id);
+  if (!area) return;
+  area.querySelectorAll('.entry-row').forEach((r, i) => { if (i > 0) r.remove(); });
+  for (let i = 1; i < vals.length; i++) addEntry(id);
+  area.querySelectorAll('.box-input').forEach((inp, i) => { inp.value = vals[i] ?? ''; });
+}
+
+/* writes */
+function sharedWrite(data) {
+  if (!myName) askName();
+  data.people = { [myDev]: { n: myName, t: Date.now() } };
+  fb.fs.setDoc(fb.ref, data, { merge: true }).catch(() => renderSyncPill('err'));
+}
+function schedule(key, fn) {
+  if (!fb) { needUpload = true; return; }
+  clearTimeout(pend.get(key)?.t);
+  pend.set(key, { fn, t: setTimeout(() => { pend.delete(key); fn(); }, 400) });
+}
+function flushPending() {
+  pend.forEach(({ t, fn }) => { clearTimeout(t); fn(); });
+  pend.clear();
+}
+function itemPatch(id) {
+  const e = ownVals(id);
+  return e.length === 1 && e[0] === '' ? fb.fs.deleteField() : { n: myName, e, t: Date.now() };
+}
+function coeffPatch(id) {
+  const v = document.getElementById('coeff-' + id)?.value ?? '';
+  return v === defCoeff(itemById(id)) ? fb.fs.deleteField() : v;
+}
+function extraPatch(i) {
+  const n = document.getElementById('extra-name-' + i)?.value || '', q = document.getElementById('extra-qty-' + i)?.value || '';
+  return n || q ? { n, q } : fb.fs.deleteField();
+}
+const queueItem  = id => schedule('i:' + id, () => sharedWrite({ items:  { [id]: { [myDev]: itemPatch(id) } } }));
+const queueCoeff = id => schedule('c:' + id, () => sharedWrite({ coeff:  { [id]: coeffPatch(id) } }));
+const queueExtra = i  => schedule('x:' + i,  () => sharedWrite({ extras: { [i]: extraPatch(i) } }));
+
+function uploadAllLocal() {           // push a count that was typed before syncing (or offline)
+  const items = {}, coeff = {}, extras = {};
+  [...vegetables, ...fruits].forEach(item => {
+    if (ownVals(item.id).some(v => v !== '')) items[item.id] = { [myDev]: itemPatch(item.id) };
+    const c = document.getElementById('coeff-' + item.id)?.value ?? '';
+    if (c !== defCoeff(item)) coeff[item.id] = c;
+  });
+  for (let i = 0; i < 5; i++) {
+    const n = document.getElementById('extra-name-' + i)?.value || '', q = document.getElementById('extra-qty-' + i)?.value || '';
+    if (n || q) extras[i] = { n, q };
+  }
+  if (!Object.keys(items).length && !Object.keys(coeff).length && !Object.keys(extras).length) return false;
+  sharedWrite({ items, coeff, extras });
+  return true;
+}
+
+function resetShared(kind) {          // 'finished' (report sent) or 'cleared' → empties the count on every phone
+  pend.forEach(({ t }) => clearTimeout(t)); pend.clear();
+  needUpload = false;
+  if (!fb) return;
+  fb.fs.setDoc(fb.ref, { [kind]: { n: myName, dev: myDev, at: Date.now() } }).catch(() => renderSyncPill('err'));
+}
+
+/* reads */
+function onShared(snap) {
+  const d = snap.exists() ? snap.data() : {};
+  fromCache = snap.metadata.fromCache;
+  if (firstSnap) {
+    firstSnap = false;
+    if (needUpload) { needUpload = false; if (uploadAllLocal()) return; }   // next snapshot carries it
+  }
+  remote = { items: d.items || {}, coeff: d.coeff || {}, extras: d.extras || {}, people: d.people || {} };
+  const hasData = Object.keys(remote.items).length > 0 || Object.keys(remote.extras).length > 0;
+  const act = document.activeElement;
+
+  [...vegetables, ...fruits].forEach(item => {
+    const id = item.id;
+    if (!document.getElementById('row-' + id)) return;
+    const typing = act && act.classList.contains('box-input') && act.dataset.id === id;
+    if (!pend.has('i:' + id) && !typing) setOwnEntries(id, remote.items[id]?.[myDev]?.e);
+    const cEl = document.getElementById('coeff-' + id);
+    if (cEl && act !== cEl && !pend.has('c:' + id)) {
+      const rc = remote.coeff[id];
+      cEl.value = rc != null ? rc : defCoeff(item);
+    }
+    renderOthers(id);
+    calcRow(id);
+  });
+  for (let i = 0; i < 5; i++) {
+    if (pend.has('x:' + i)) continue;
+    const x = remote.extras[i] || { n: '', q: '' };
+    const n = document.getElementById('extra-name-' + i), q = document.getElementById('extra-qty-' + i);
+    if (n && act !== n) n.value = x.n || '';
+    if (q && act !== q) q.value = x.q || '';
+  }
+  updateTotal();
+  saveDraft();
+
+  const end = d.finished || d.cleared;
+  if (!hasData && hadData && end && end.dev !== myDev) {
+    showToast(d.finished ? `✅ ${end.n} סיים/ה את הספירה ושלח/ה את הדו"ח` : `🗑 ${end.n} מחק/ה את הספירה`);
+  }
+  hadData = hasData;
+  renderSyncPill();
+}
+
+async function initShared() {
+  if (fb || fbLoading) return;
+  fbLoading = true;
+  try {
+    const appMod = await import(FB_URL + 'firebase-app.js');
+    const fs = await import(FB_URL + 'firebase-firestore.js');
+    const app = appMod.initializeApp(FB_CONFIG, 'vegcount');
+    let db;
+    try { db = fs.initializeFirestore(app, { localCache: fs.persistentLocalCache({ tabManager: fs.persistentMultipleTabManager() }) }); }
+    catch (e) { db = fs.getFirestore(app); }
+    fb = { fs, ref: fs.doc(db, 'vegcount', 'branch' + BRANCH) };
+    if (!myName) setTimeout(() => { askName(); renderSyncPill(); }, 600);
+    fs.onSnapshot(fb.ref, { includeMetadataChanges: true }, onShared, () => renderSyncPill('err'));
+  } catch (e) {
+    renderSyncPill('off');
+  } finally { fbLoading = false; }
+}
 
 /* ── Draft persistence: count survives closing the app until the report is sent ── */
 const DRAFT_KEY = 'vegcount-draft';
@@ -1204,7 +1415,7 @@ function saveDraft() {
   try {
     if (empty) { localStorage.removeItem(DRAFT_KEY); return; }
     const prev = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
-    localStorage.setItem(DRAFT_KEY, JSON.stringify({ started: prev?.started || Date.now(), saved: Date.now(), items, extras }));
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ started: prev?.started || Date.now(), saved: Date.now(), items, extras, shared: !needUpload }));
   } catch (e) {}
 }
 
@@ -1213,6 +1424,7 @@ function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
 function restoreDraft() {
   let d; try { d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch (e) { return; }
   if (!d) return;
+  if (!d.shared) needUpload = true;          // count typed before sharing existed / while offline → upload it
   Object.entries(d.items || {}).forEach(([id, v]) => {
     if (!document.getElementById('row-' + id)) return;
     (v.e || []).forEach((val, i) => {
@@ -1229,17 +1441,25 @@ function restoreDraft() {
     if (n) n.value = x.n || ''; if (q) q.value = x.q || '';
   });
   updateTotal();
+  if (d.shared) return;
   const t = new Date(d.started || d.saved);
   const pad = n => String(n).padStart(2, '0');
   showToast(`📋 הספירה שהתחילה ב-${pad(t.getDate())}.${pad(t.getMonth() + 1)} ${pad(t.getHours())}:${pad(t.getMinutes())} שוחזרה`);
 }
 
 document.addEventListener('input', e => {
-  if (e.target.matches('.box-input, .coeff-input, .extra-name-input, .extra-qty-input')) saveDraft();
+  const t = e.target;
+  if (!t.matches('.box-input, .coeff-input, .extra-name-input, .extra-qty-input')) return;
+  if (t.matches('.box-input')) queueItem(t.dataset.id);
+  else if (t.matches('.coeff-input')) queueCoeff(t.id.slice(6));
+  else queueExtra(+t.id.split('-').pop());
+  saveDraft();
 });
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveDraft(); });
-window.addEventListener('pagehide', saveDraft);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { flushPending(); saveDraft(); } });
+window.addEventListener('pagehide', () => { flushPending(); saveDraft(); });
 restoreDraft();
+initShared();
+window.addEventListener('online', initShared);
 
 </script>
 </body>
