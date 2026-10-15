@@ -276,6 +276,9 @@ body {
   box-shadow:0 3px 0 #A5D6A7, 0 5px 10px rgba(0,0,0,.25);
 }
 .btn-abc:active { transform:translateY(2px); box-shadow:0 1px 0 #A5D6A7; }
+.btn-avi { background:#FFF59D; border:none; color:#5D4037; border-radius:12px; height:40px; padding:0 9px; cursor:pointer; white-space:nowrap;
+  font-family:inherit; font-size:16px; font-weight:900; box-shadow:0 3px 0 #FBC02D, 0 5px 10px rgba(0,0,0,.25); }
+.btn-avi:active { transform:translateY(2px); box-shadow:0 1px 0 #FBC02D; }
 .abc-overlay {
   display:none; position:fixed; inset:0; z-index:500;
   background:radial-gradient(circle at 50% 45%, #2e5d31, #0b1a0c);   /* opaque: no backdrop blur */
@@ -397,6 +400,7 @@ body {
       <div class="header-date" id="dateStr"></div>
     </div>
     <div style="display:flex;gap:6px;align-items:center;">
+      <button class="btn-avi" onclick="sendAviSheet()" title="שלח דף ספירה להדפסה עבור אבי">אבי</button>
       <button class="btn-abc" onclick="openAbc()" title="קפיצה לפי אות">אב</button>
       <button class="btn-search" onclick="toggleSearch()">🔍 חיפוש</button>
       <button class="btn-clear" onclick="clearAll()">🗑 נקה</button>
@@ -480,6 +484,7 @@ body {
 </div>
 
 <script src="xlsx-report.js"></script>
+<script src="avi-sheet.js"></script>
 <script>
 const BARCODE_SVG = `<svg width="20" height="13" viewBox="0 0 20 13" fill="currentColor">
   <rect x="0" y="0" width="1.8" height="13"/>
@@ -671,6 +676,7 @@ const fruits = [
   {id:'f74', name:"ענבים אדומים סקרלוטה", emoji:'🍇', coeff:null, barcode:null, barcodeNum:'7290005678585', en:'Red grapes, Scarlotta'},
   {id:'f75', name:"ענבים ירוקים", emoji:'🍇', coeff:null, barcode:null, barcodeNum:null, en:'Green grapes'},
   {id:'f76', name:"פומלה אדומה", emoji:'🍊', coeff:null, barcode:null, barcodeNum:null, en:'Red pomelo'},
+  {id:'f77', name:"אנונה", emoji:'🍈', coeff:null, barcode:null, barcodeNum:'7290000966670', en:'Annona (cherimoya)'},
 ];
 
 /* ── Row builder ──────────────────────────────────────── */
@@ -1183,6 +1189,29 @@ async function finishCount() {
     resetShared('finished');
     setSendStatus('⚠️ אין חיבור — הדו"ח יישלח אוטומטית כשהאינטרנט יחזור', true);
     showToast('⚠️ השליחה נכשלה — יישלח שוב אוטומטית');
+  }
+}
+
+/* ── "אבי" button → printable manual count sheet → same 3 recipients ── */
+async function sendAviSheet() {
+  if (!confirm('לשלוח במייל דף ספירה להדפסה עבור אבי?')) return;
+  showToast('מכין דף ספירה...');
+  try { await loadExcelJS(); } catch (e) { showToast('שגיאה: ' + e); return; }
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const date = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()}`;
+  const buf = await buildAviWorkbook(ExcelJS, vegetables, fruits, { branch: BRANCH }).xlsx.writeBuffer();
+  const filename = `דף_ספירה_אבי_${date}.xlsx`;
+  showToast('שולח...');
+  try {
+    await postReport({
+      key: REPORT_KEY, filename, b64: bufToB64(buf),
+      subject: `דף ספירה להדפסה — אבי — סניף ${BRANCH} — ${date}`,
+      body: 'מצורף דף ספירה ריק להדפסה עבור אבי.\nאחרי המילוי — לצלם את הדפים ולהעלות לאפליקציה.',
+    });
+    showToast('✅ דף הספירה של אבי נשלח במייל!');
+  } catch (e) {
+    showToast('⚠️ השליחה נכשלה — בדוק חיבור לאינטרנט');
   }
 }
 
