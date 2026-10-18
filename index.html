@@ -389,6 +389,16 @@ body {
   font-size:12.5px; font-weight:700; color:#0D47A1; background:#E3F2FD;
   border:1px solid #90CAF9; border-radius:10px; padding:2px 8px; direction:rtl;
 }
+/* copyright */
+.app-footer { text-align:center; padding:4px 0 28px; }
+.cp-link { font-size:11px; color:rgba(0,0,0,.45); cursor:pointer; text-decoration:underline; }
+.cp-overlay { position:fixed; inset:0; z-index:500; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; padding:20px; }
+.cp-overlay.active { display:flex; }
+.cp-box { background:#fff; border-radius:22px; padding:26px 22px; max-width:360px; width:100%; max-height:85vh; overflow-y:auto; }
+.cp-title { font-size:20px; font-weight:900; color:#2e7d32; margin-bottom:14px; text-align:center; }
+.cp-text { font-size:14px; line-height:1.8; color:#333; }
+.cp-sep { border:none; border-top:1px solid #eee; margin:16px 0; }
+.cp-close { margin-top:20px; width:100%; background:#2e7d32; color:#fff; border:none; border-radius:13px; padding:13px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; }
 </style>
 </head>
 <body>
@@ -460,6 +470,30 @@ body {
 <div class="actions-card">
   <button class="btn-action finish" onclick="finishCount()">✅ סיים ספירה ושלח Excel</button>
   <div class="send-status" id="sendStatus"></div>
+</div>
+
+<footer class="app-footer">
+  <span class="cp-link" onclick="document.getElementById('cpOverlay').classList.add('active')">© Evgeniy Tsipis 2026 — All rights reserved · כל הזכויות שמורות</span>
+</footer>
+
+<div class="cp-overlay" id="cpOverlay" onclick="if(event.target===this)this.classList.remove('active')">
+  <div class="cp-box">
+    <div class="cp-title">זכויות יוצרים · Copyright</div>
+    <div class="cp-text" style="text-align:right; direction:rtl;">
+      © כל הזכויות שמורות ליבגני ציפיס 2026<br><br>
+      יישום זה פותח ועוצב על ידי יבגני ציפיס עבור סניף שופרסל 118, לצורך ספירת מלאי ירקות ופירות.<br><br>
+      חל איסור על העתקה, הפצה או שימוש מסחרי בכל חלק מהיישום ללא אישור בכתב מהמחבר.<br><br>
+      כל הסימנים המסחריים הם רכושם של בעליהם בהתאמה.
+    </div>
+    <hr class="cp-sep">
+    <div class="cp-text" style="text-align:left; direction:ltr;">
+      © 2026 Evgeniy Tsipis. All rights reserved.<br><br>
+      This application was developed and designed by Evgeniy Tsipis for Shufersal branch 118, for counting fruit and vegetable stock.<br><br>
+      Copying, distribution or commercial use of any part of this application without the author's written permission is prohibited.<br><br>
+      All trademarks are the property of their respective owners.
+    </div>
+    <button class="cp-close" onclick="document.getElementById('cpOverlay').classList.remove('active')">סגירה · Close</button>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
