@@ -1,4 +1,4 @@
-const CACHE = 'vegcount-v20';
+const CACHE = 'vegcount-v21';
 const ASSETS = ['./', './index.html', './manifest.json', './xlsx-report.js', './avi-sheet.js',
   './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 // CDN libraries (Firebase, ExcelJS) are cached on first use so the app also opens offline
