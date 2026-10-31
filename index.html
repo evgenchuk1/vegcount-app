@@ -24,9 +24,11 @@ body {
   position:sticky; top:0; z-index:100;
   box-shadow:0 2px 8px rgba(0,0,0,.15);
 }
-.et-brand { position:absolute; top:2px; right:16px; font-size:11px; line-height:14px; font-weight:700; letter-spacing:.4px; color:#FFE082; direction:ltr; }
-.header-top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
-.header-top > div:first-child { min-width:0; }
+.header-top { display:flex; align-items:center; gap:10px; }
+.header-top > div:last-child { min-width:0; }
+.et-logo { width:44px; height:44px; border-radius:10px; flex-shrink:0; display:block; }
+.header-btns { display:flex; justify-content:space-between; align-items:center; gap:6px; margin-top:12px; }
+.header-btns > div { display:flex; gap:6px; align-items:center; }
 .app-title { font-size:22px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 @media (max-width:430px) { .app-title { font-size:17px; } .app-title span { font-size:20px; } .btn-search,.btn-clear { padding:6px 10px; white-space:nowrap; } }
 .app-title span { font-size:26px; margin-left:6px; }
@@ -396,6 +398,7 @@ body {
 .cp-overlay { position:fixed; inset:0; z-index:500; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; padding:20px; }
 .cp-overlay.active { display:flex; }
 .cp-box { background:#fff; border-radius:22px; padding:26px 22px; max-width:360px; width:100%; max-height:85vh; overflow-y:auto; }
+.cp-logo { display:block; width:110px; margin:0 auto 10px; border-radius:12px; }
 .cp-title { font-size:20px; font-weight:900; color:#2e7d32; margin-bottom:14px; text-align:center; }
 .cp-text { font-size:14px; line-height:1.8; color:#333; }
 .cp-sep { border:none; border-top:1px solid #eee; margin:16px 0; }
@@ -405,15 +408,19 @@ body {
 <body>
 
 <div class="header">
-  <div class="et-brand">ET studio</div>
   <div class="header-top">
+    <img class="et-logo" src="et-mark.png" alt="ET studio">
     <div>
       <div class="app-title"><span>🥦</span>ספירת ירקות ופירות</div>
       <div class="header-date" id="dateStr"></div>
     </div>
-    <div style="display:flex;gap:6px;align-items:center;">
+  </div>
+  <div class="header-btns">
+    <div>
       <button class="btn-avi" onclick="sendAviSheet()" title="שלח דף ספירה להדפסה עבור אבי">אבי</button>
       <button class="btn-abc" onclick="openAbc()" title="קפיצה לפי אות">אב</button>
+    </div>
+    <div>
       <button class="btn-search" onclick="toggleSearch()">🔍 חיפוש</button>
       <button class="btn-clear" onclick="clearAll()">🗑 נקה</button>
     </div>
@@ -480,6 +487,7 @@ body {
 
 <div class="cp-overlay" id="cpOverlay" onclick="if(event.target===this)this.classList.remove('active')">
   <div class="cp-box">
+    <img class="cp-logo" src="et-logo.jpg" alt="ET studio">
     <div class="cp-title">זכויות יוצרים · Copyright</div>
     <div class="cp-text" style="text-align:right; direction:rtl;">
       © כל הזכויות שמורות ליבגני ציפיס, ET studio 2026<br><br>
