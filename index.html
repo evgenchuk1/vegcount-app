@@ -728,6 +728,8 @@ const fruits = [
   {id:'f75', name:"ענבים ירוקים", emoji:'🍇', coeff:null, barcode:null, barcodeNum:null, en:'Green grapes'},
   {id:'f76', name:"פומלה אדומה", emoji:'🍊', coeff:null, barcode:null, barcodeNum:null, en:'Red pomelo'},
   {id:'f77', name:"אנונה", emoji:'🍈', coeff:null, barcode:null, barcodeNum:'7290000966670', en:'Annona (cherimoya)'},
+  {id:'f78', name:"מארז אגס נאשי", emoji:'🍐', coeff:null, barcode:null, barcodeNum:'2204169', en:'Nashi pear pack (~4 pcs)', unit:true},
+  {id:'f79', name:"תפוח עץ יונתן", emoji:'🍎', coeff:null, barcode:null, barcodeNum:'7290000963228', en:'Jonathan apple'},
 ];
 
 /* ── Row builder ──────────────────────────────────────── */
@@ -1005,7 +1007,14 @@ function renderNumBarcodes() {
             width: 3, height: 100,
             displayValue: true, fontSize: 22, margin: 10
           });
-        } catch(e) {}
+        } catch(e) {
+          // קוד פנימי (לא EAN-13) — מציגים את המספר עצמו
+          canvas.width = 360; canvas.height = 90;
+          const c = canvas.getContext('2d');
+          c.fillStyle = '#fff'; c.fillRect(0, 0, 360, 90);
+          c.fillStyle = '#000'; c.font = 'bold 44px Arial'; c.textAlign = 'center'; c.textBaseline = 'middle';
+          c.fillText(item.barcodeNum, 180, 47);
+        }
       }
     }
   });
