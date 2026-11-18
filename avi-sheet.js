@@ -1,9 +1,11 @@
 /* ── Printable manual count sheet for Avi (shared: browser + node) ────
    buildAviWorkbook(ExcelJS, vegetables, fruits, meta) → ExcelJS.Workbook
    meta: { branch:'118' }
-   Three columns (RTL): name (Hebrew, English below) | barcode digits | empty box
-   for the handwritten count. Large print (23pt names, 22pt barcode) for
-   reading on paper and for photographing / scanning the filled pages later.
+   Four columns (RTL): name (Hebrew, English below) | scannable EAN-13 bars |
+   barcode digits (one line) | empty box for the handwritten count.
+   Large print (23pt names) for reading on paper and for photographing /
+   scanning the filled pages later. Barcode PNGs are generated here in pure
+   JS (no canvas), so the same code runs in the browser and in node.
 */
 (function (root) {
   const GREEN = 'FF2E7D32', GREY = 'FF616161', UNIT_BG = 'FFEEEEEE';
@@ -13,8 +15,80 @@
   const isUnit = it => !!it.unit || /\(יח'\)/.test(it.name);
   const byNameHe = (a, b) => a.name.localeCompare(b.name, 'he');
 
-  const W_NAME = 40, W_CODE = 32, W_QTY = 26;           // A (right) | B | C (left)
-  const NAME_PT = 23, EN_PT = 12, CODE_PT = 22;
+  const W_NAME = 40, W_BARS = 28, W_CODE = 22, W_QTY = 18;   // A (right) | B | C | D (left)
+  const NAME_PT = 23, EN_PT = 12, CODE_PT = 13;
+  const NCOL = 4;
+  const BARS_W = 170, BARS_H = 52;                 // image size on the sheet, px
+  const MIN_ROW_PT = 54;                           // row tall enough for the bars
+
+  /* ── EAN-13 → 95 modules ── */
+  const L = ['0001101','0011001','0010011','0111101','0100011','0110001','0101111','0111011','0110111','0001011'];
+  const G = ['0100111','0110011','0011011','0100001','0011101','0111001','0000101','0010001','0001001','0010111'];
+  const R = L.map(s => s.replace(/./g, b => (b === '1' ? '0' : '1')));
+  const PAR = ['LLLLLL','LLGLGG','LLGGLG','LLGGGL','LGLLGG','LGGLLG','LGGGLL','LGLGLG','LGLGGL','LGGLGL'];
+  function ean13Modules(c) {
+    if (!/^\d{13}$/.test(c)) return null;
+    let sum = 0;
+    for (let i = 0; i < 12; i++) sum += (+c[i]) * (i % 2 ? 3 : 1);
+    if ((10 - sum % 10) % 10 !== +c[12]) return null;           // bad check digit → no bars
+    const p = PAR[+c[0]];
+    let m = '101';
+    for (let i = 1; i <= 6; i++) m += (p[i - 1] === 'L' ? L : G)[+c[i]];
+    m += '01010';
+    for (let i = 7; i <= 12; i++) m += R[+c[i]];
+    return m + '101';
+  }
+
+  /* ── minimal 1-bit grayscale PNG encoder (stored deflate) ── */
+  const CRC = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  const crc32 = (bytes) => { let c = 0xFFFFFFFF; for (const b of bytes) c = CRC[(c ^ b) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  const u32 = v => [(v >>> 24) & 255, (v >>> 16) & 255, (v >>> 8) & 255, v & 255];
+  function chunk(type, data) {
+    const td = [...type].map(ch => ch.charCodeAt(0)).concat(data);
+    return u32(data.length).concat(td, u32(crc32(td)));
+  }
+  function pngBase64(width, height, isBlack) {          // isBlack(x,y) → bool
+    const rowBytes = Math.ceil(width / 8), raw = [];
+    for (let y = 0; y < height; y++) {
+      raw.push(0);                                        // filter: none
+      for (let bx = 0; bx < rowBytes; bx++) {
+        let byte = 0;
+        for (let k = 0; k < 8; k++) {
+          const x = bx * 8 + k;
+          const white = x >= width || !isBlack(x, y);
+          byte |= (white ? 1 : 0) << (7 - k);             // 1 = white in grayscale
+        }
+        raw.push(byte);
+      }
+    }
+    const z = [0x78, 0x01];
+    for (let i = 0; i < raw.length; i += 65535) {
+      const blk = raw.slice(i, i + 65535), last = i + 65535 >= raw.length ? 1 : 0;
+      z.push(last, blk.length & 255, blk.length >>> 8, ~blk.length & 255, (~blk.length >>> 8) & 255);
+      for (const b of blk) z.push(b);
+    }
+    let a = 1, b2 = 0;
+    for (const v of raw) { a = (a + v) % 65521; b2 = (b2 + a) % 65521; }
+    z.push(...u32(((b2 << 16) | a) >>> 0));
+    const bytes = [137, 80, 78, 71, 13, 10, 26, 10]
+      .concat(chunk('IHDR', u32(width).concat(u32(height), [1, 0, 0, 0, 0])))
+      .concat(chunk('IDAT', z), chunk('IEND', []));
+    if (typeof Buffer !== 'undefined') return Buffer.from(bytes).toString('base64');
+    let s = ''; for (let i = 0; i < bytes.length; i += 8192) s += String.fromCharCode.apply(null, bytes.slice(i, i + 8192));
+    return btoa(s);
+  }
+  function barcodePng(code) {
+    const m = ean13Modules(code);
+    if (!m) return null;
+    const S = 3, QUIET = 9, H = 150, GUARD_H = 150, BAR_H = 136;
+    const W = (95 + QUIET * 2) * S;
+    const guard = i => i < 3 || (i >= 45 && i < 50) || i >= 92;
+    return pngBase64(W, H, (x, y) => {
+      const i = Math.floor(x / S) - QUIET;
+      if (i < 0 || i >= 95 || m[i] !== '1') return false;
+      return y < (guard(i) ? GUARD_H : BAR_H);
+    });
+  }
 
   function buildAviWorkbook(ExcelJS, vegetables, fruits, meta) {
     const wb = new ExcelJS.Workbook();
@@ -29,13 +103,14 @@
       },
     });
     ws.headerFooter.oddFooter = '&C&14עמוד &P מתוך &N';
-    ws.columns = [W_NAME, W_CODE, W_QTY].map(width => ({ width }));
+    ws.columns = [W_NAME, W_BARS, W_CODE, W_QTY].map(width => ({ width }));
+    const barsColPx = W_BARS * 7 + 5;
 
     const frame = (cell, top, bottom) => {
       cell.border = { top: top || med, bottom: bottom || med, left: thick, right: thick };
     };
     const banner = (row, value, font, height, bg) => {
-      ws.mergeCells(row, 1, row, 3);
+      ws.mergeCells(row, 1, row, NCOL);
       const c = ws.getCell(row, 1);
       c.value = value; c.font = font;
       c.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
@@ -50,7 +125,7 @@
 
     const head = ws.getRow(4);
     head.height = 38;
-    ['שם המוצר', 'ברקוד', 'כמות'].forEach((h, i) => {
+    ['שם המוצר', 'סריקה', 'ברקוד', 'כמות'].forEach((h, i) => {
       const c = head.getCell(i + 1);
       c.value = h;
       c.font = { name: 'Arial', bold: true, size: 22, color: { argb: 'FFFFFFFF' } };
@@ -70,24 +145,43 @@
 
     const itemRow = it => {
       const unit = isUnit(it);
-      const code = it.barcodeNum || it.ean || '';
+      const code = String(it.barcodeNum || it.ean || '');
       const row = ws.getRow(r);
       const nameRich = [{ text: (unit ? '★ ' : '') + it.name, font: { name: 'Arial', bold: true, size: NAME_PT } }];
       if (it.en) nameRich.push({ text: '\n' + it.en, font: { name: 'Arial', size: EN_PT, color: { argb: GREY } } });
-      row.height = nameLines((unit ? '★ ' : '') + it.name) * NAME_PT * 1.25 + (it.en ? EN_PT * 1.4 : 0) + 12;
+      row.height = Math.max(MIN_ROW_PT,
+        nameLines((unit ? '★ ' : '') + it.name) * NAME_PT * 1.25 + (it.en ? EN_PT * 1.4 : 0) + 12);
 
       const a = row.getCell(1);
       a.value = { richText: nameRich };
       a.alignment = { horizontal: 'right', vertical: 'middle', wrapText: true, readingOrder: 'rtl' };
-      const b = row.getCell(2);
+
+      const bars = row.getCell(2);
+      const png = code ? barcodePng(code) : null;
+      if (png) {
+        const imgId = wb.addImage({ base64: png, extension: 'png' });
+        const rowPx = row.height * 4 / 3;
+        ws.addImage(imgId, {
+          tl: { col: 1 + (barsColPx - BARS_W) / 2 / barsColPx, row: r - 1 + (rowPx - BARS_H) / 2 / rowPx },
+          ext: { width: BARS_W, height: BARS_H },
+          editAs: 'oneCell',
+        });
+      } else {
+        bars.value = '—';
+        bars.font = { name: 'Arial', size: 16, color: { argb: GREY } };
+        bars.alignment = { horizontal: 'center', vertical: 'middle' };
+      }
+
+      const b = row.getCell(3);
       b.value = code || '—';
       b.font = { name: 'Arial', bold: true, size: CODE_PT, color: { argb: code ? 'FF000000' : GREY } };
-      b.alignment = { horizontal: 'center', vertical: 'middle' };
-      const c = row.getCell(3);
+      b.alignment = { horizontal: 'center', vertical: 'middle', shrinkToFit: true };
+
+      const c = row.getCell(4);
       c.value = { richText: [{ text: unit ? 'יחידות' : 'ארגזים', font: { name: 'Arial', size: 10, color: { argb: 'FFBDBDBD' } } }] };
       c.alignment = { horizontal: 'center', vertical: 'bottom' };
-      if (unit) { a.fill = fill(UNIT_BG); b.fill = fill(UNIT_BG); }
-      [a, b, c].forEach(x => frame(x));
+      if (unit) { a.fill = fill(UNIT_BG); bars.fill = fill(UNIT_BG); b.fill = fill(UNIT_BG); }
+      [a, bars, b, c].forEach(x => frame(x));
       r++;
     };
 
@@ -99,11 +193,12 @@
     for (let i = 0; i < 6; i++) {
       const row = ws.getRow(r++);
       row.height = 56;
-      [1, 2, 3].forEach(k => frame(row.getCell(k)));
+      [1, 2, 3, 4].forEach(k => frame(row.getCell(k)));
     }
     return wb;
   }
 
   root.buildAviWorkbook = buildAviWorkbook;
-  if (typeof module !== 'undefined' && module.exports) module.exports = { buildAviWorkbook };
+  root.aviBarcodePng = barcodePng;
+  if (typeof module !== 'undefined' && module.exports) module.exports = { buildAviWorkbook, barcodePng };
 })(typeof window !== 'undefined' ? window : globalThis);
