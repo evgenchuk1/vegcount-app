@@ -4,8 +4,10 @@
    Four columns (RTL): name (Hebrew, English below) | scannable EAN-13 bars |
    barcode digits (one line) | empty box for the handwritten count.
    Large print (23pt names) for reading on paper and for photographing /
-   scanning the filled pages later. Barcode PNGs are generated here in pure
-   JS (no canvas), so the same code runs in the browser and in node.
+   scanning the filled pages later.
+   The bars are drawn with CELL FILLS (one narrow column per EAN module), not
+   as a floating picture: pictures are dropped when the file is printed from
+   a mail/phone viewer or Google Sheets, cell fills print everywhere.
 */
 (function (root) {
   const GREEN = 'FF2E7D32', GREY = 'FF616161', UNIT_BG = 'FFEEEEEE';
@@ -15,11 +17,14 @@
   const isUnit = it => !!it.unit || /\(יח'\)/.test(it.name);
   const byNameHe = (a, b) => a.name.localeCompare(b.name, 'he');
 
-  const W_NAME = 40, W_BARS = 28, W_CODE = 22, W_QTY = 18;   // A (right) | B | C | D (left)
+  const W_NAME = 40, W_CODE = 22, W_QTY = 18;
   const NAME_PT = 23, EN_PT = 12, CODE_PT = 13;
-  const NCOL = 4;
-  const BARS_W = 170, BARS_H = 52;                 // image size on the sheet, px
-  const MIN_ROW_PT = 54;                           // row tall enough for the bars
+  const QUIET = 7, NBARS = 95 + QUIET * 2;         // bar columns: quiet | 95 modules | quiet
+  const W_MOD = 0.25;                              // ≈3 px per module in Excel
+  const C_NAME = 1, C_BAR0 = 2, C_BARN = C_BAR0 + NBARS - 1, C_CODE = C_BARN + 1, C_QTY = C_BARN + 2;
+  const NCOL = C_QTY;
+  const MIN_ROW_PT = 54;
+  const BLACK = 'FF000000';
 
   /* ── EAN-13 → 95 modules ── */
   const L = ['0001101','0011001','0010011','0111101','0100011','0110001','0101111','0111011','0110111','0001011'];
@@ -103,8 +108,7 @@
       },
     });
     ws.headerFooter.oddFooter = '&C&14עמוד &P מתוך &N';
-    ws.columns = [W_NAME, W_BARS, W_CODE, W_QTY].map(width => ({ width }));
-    const barsColPx = W_BARS * 7 + 5;
+    ws.columns = [W_NAME, ...Array(NBARS).fill(W_MOD), W_CODE, W_QTY].map(width => ({ width }));
 
     const frame = (cell, top, bottom) => {
       cell.border = { top: top || med, bottom: bottom || med, left: thick, right: thick };
@@ -125,8 +129,9 @@
 
     const head = ws.getRow(4);
     head.height = 38;
-    ['שם המוצר', 'סריקה', 'ברקוד', 'כמות'].forEach((h, i) => {
-      const c = head.getCell(i + 1);
+    ws.mergeCells(4, C_BAR0, 4, C_BARN);
+    [[C_NAME, 'שם המוצר'], [C_BAR0, 'סריקה'], [C_CODE, 'ברקוד'], [C_QTY, 'כמות']].forEach(([col, h]) => {
+      const c = head.getCell(col);
       c.value = h;
       c.font = { name: 'Arial', bold: true, size: 22, color: { argb: 'FFFFFFFF' } };
       c.fill = fill('FF388E3C');
@@ -152,36 +157,43 @@
       row.height = Math.max(MIN_ROW_PT,
         nameLines((unit ? '★ ' : '') + it.name) * NAME_PT * 1.25 + (it.en ? EN_PT * 1.4 : 0) + 12);
 
-      const a = row.getCell(1);
+      const a = row.getCell(C_NAME);
       a.value = { richText: nameRich };
       a.alignment = { horizontal: 'right', vertical: 'middle', wrapText: true, readingOrder: 'rtl' };
 
-      const bars = row.getCell(2);
-      const png = code ? barcodePng(code) : null;
-      if (png) {
-        const imgId = wb.addImage({ base64: png, extension: 'png' });
-        const rowPx = row.height * 4 / 3;
-        ws.addImage(imgId, {
-          tl: { col: 1 + (barsColPx - BARS_W) / 2 / barsColPx, row: r - 1 + (rowPx - BARS_H) / 2 / rowPx },
-          ext: { width: BARS_W, height: BARS_H },
-          editAs: 'oneCell',
-        });
+      const mods = code ? ean13Modules(code) : null;
+      const barCells = [];
+      if (mods) {
+        // sheet is RTL: higher column index = further left, so module 0 goes to the last bar column
+        for (let k = 0; k < NBARS; k++) {
+          const i = NBARS - 1 - k - QUIET;
+          const cell = row.getCell(C_BAR0 + k);
+          if (i >= 0 && i < 95 && mods[i] === '1') cell.fill = fill(BLACK);
+          barCells.push(cell);
+        }
       } else {
+        ws.mergeCells(r, C_BAR0, r, C_BARN);
+        const bars = row.getCell(C_BAR0);
+        barCells.push(bars);
         bars.value = '—';
         bars.font = { name: 'Arial', size: 16, color: { argb: GREY } };
         bars.alignment = { horizontal: 'center', vertical: 'middle' };
       }
 
-      const b = row.getCell(3);
+      const b = row.getCell(C_CODE);
       b.value = code || '—';
       b.font = { name: 'Arial', bold: true, size: CODE_PT, color: { argb: code ? 'FF000000' : GREY } };
       b.alignment = { horizontal: 'center', vertical: 'middle', shrinkToFit: true };
 
-      const c = row.getCell(4);
+      const c = row.getCell(C_QTY);
       c.value = { richText: [{ text: unit ? 'יחידות' : 'ארגזים', font: { name: 'Arial', size: 10, color: { argb: 'FFBDBDBD' } } }] };
       c.alignment = { horizontal: 'center', vertical: 'bottom' };
-      if (unit) { a.fill = fill(UNIT_BG); bars.fill = fill(UNIT_BG); b.fill = fill(UNIT_BG); }
-      [a, bars, b, c].forEach(x => frame(x));
+      if (unit) {
+        a.fill = fill(UNIT_BG); b.fill = fill(UNIT_BG);
+        if (!mods) barCells[0].fill = fill(UNIT_BG);      // bars keep a white background to scan
+      }
+      [a, b, c].forEach(x => frame(x));
+      barCells.forEach(x => { x.border = { top: med, bottom: med }; });
       r++;
     };
 
@@ -193,7 +205,8 @@
     for (let i = 0; i < 6; i++) {
       const row = ws.getRow(r++);
       row.height = 56;
-      [1, 2, 3, 4].forEach(k => frame(row.getCell(k)));
+      ws.mergeCells(row.number, C_BAR0, row.number, C_BARN);
+      [C_NAME, C_BAR0, C_CODE, C_QTY].forEach(k => frame(row.getCell(k)));
     }
     return wb;
   }
